@@ -1431,51 +1431,78 @@ class Component extends DCLogic {
     const findings = this.state.vFindings || [];
     const activeIdx = this.state.activeHoverIndex;
 
-    // Draw tape for redacted items
+    // Draw content-aware blended redaction for redacted items
     findings.forEach((f) => {
       if (!f.redacted) return;
       const rect = this.getRect(f);
-      const x = (rect.x / 100) * canvas.width;
-      const y = (rect.y / 100) * canvas.height;
-      const w = (rect.w / 100) * canvas.width;
-      const h = (rect.h / 100) * canvas.height;
-      
-      const px = x - canvas.width * 0.02;
-      const py = y - canvas.height * 0.02;
-      const pw = w + canvas.width * 0.04;
-      const ph = h + canvas.height * 0.04;
-      
+      const x = Math.round((rect.x / 100) * canvas.width);
+      const y = Math.round((rect.y / 100) * canvas.height);
+      const w = Math.max(4, Math.round((rect.w / 100) * canvas.width));
+      const h = Math.max(4, Math.round((rect.h / 100) * canvas.height));
+
+      // Sample border pixels to get a blending colour
+      const sampleW = Math.min(10, Math.floor(w * 0.25));
+      const sampleH = Math.min(10, Math.floor(h * 0.25));
+      let rSum = 0, gSum = 0, bSum = 0, count = 0;
+      const sampleRegions = [
+        { sx: Math.max(0, x - sampleW - 2), sy: y, sw: sampleW, sh: h },
+        { sx: Math.min(canvas.width - sampleW, x + w + 2), sy: y, sw: sampleW, sh: h },
+        { sx: x, sy: Math.max(0, y - sampleH - 2), sw: w, sh: sampleH },
+        { sx: x, sy: Math.min(canvas.height - sampleH, y + h + 2), sw: w, sh: sampleH },
+      ];
+      sampleRegions.forEach(({ sx, sy, sw, sh }) => {
+        if (sw <= 0 || sh <= 0) return;
+        try {
+          const d = ctx.getImageData(sx, sy, sw, sh).data;
+          for (let j = 0; j < d.length; j += 4) { rSum += d[j]; gSum += d[j+1]; bSum += d[j+2]; count++; }
+        } catch(e) { /* cross-origin guard */ }
+      });
+      const avgR = count > 0 ? Math.round(rSum / count) : 30;
+      const avgG = count > 0 ? Math.round(gSum / count) : 30;
+      const avgB = count > 0 ? Math.round(bSum / count) : 30;
+
+      // Gaussian-like blur pass over the region to blend into background
       ctx.save();
-      ctx.fillStyle = '#1c1c1e';
-      ctx.shadowColor = 'rgba(0,0,0,0.5)';
-      ctx.shadowBlur = 8;
-      ctx.shadowOffsetY = 4;
-      
-      // deterministic tilt based on coords
-      const tilt = (((px + py) % 100) / 100) * 0.06 - 0.03;
-      ctx.translate(px + pw/2, py + ph/2);
-      ctx.rotate(tilt);
-      ctx.fillRect(-pw/2, -ph/2, pw, ph);
+      ctx.filter = 'blur(14px)';
+      ctx.drawImage(canvas, x, y, w, h, x, y, w, h);
+      ctx.filter = 'none';
+      // Light tinted fill with averaged colour at 80% opacity
+      ctx.fillStyle = `rgba(${avgR},${avgG},${avgB},0.82)`;
+      ctx.fillRect(x, y, w, h);
+      // Very subtle darkened edges to feel natural
+      const edgeGrad = ctx.createLinearGradient(x, y, x + w, y + h);
+      edgeGrad.addColorStop(0,   'rgba(0,0,0,0.18)');
+      edgeGrad.addColorStop(0.5, 'rgba(0,0,0,0.0)');
+      edgeGrad.addColorStop(1,   'rgba(0,0,0,0.18)');
+      ctx.fillStyle = edgeGrad;
+      ctx.fillRect(x, y, w, h);
       ctx.restore();
     });
 
-    // Draw lasso for hovered item
+    // Draw lasso for hovered (not-yet-redacted) item — tight outline + glow only
     if (activeIdx !== null && activeIdx >= 0 && activeIdx < findings.length) {
       const f = findings[activeIdx];
       if (!f.redacted) {
         const rect = this.getRect(f);
-        const x = (rect.x / 100) * canvas.width;
-        const y = (rect.y / 100) * canvas.height;
-        const w = (rect.w / 100) * canvas.width;
-        const h = (rect.h / 100) * canvas.height;
-        
+        const x = Math.round((rect.x / 100) * canvas.width);
+        const y = Math.round((rect.y / 100) * canvas.height);
+        const w = Math.max(4, Math.round((rect.w / 100) * canvas.width));
+        const h = Math.max(4, Math.round((rect.h / 100) * canvas.height));
+
         ctx.save();
-        ctx.strokeStyle = '#fb7185';
-        ctx.lineWidth = Math.max(3, canvas.width * 0.005);
-        ctx.setLineDash([15, 10]);
+        // Outer glow
         ctx.shadowColor = '#fb7185';
-        ctx.shadowBlur = 12;
-        ctx.strokeRect(x, y, w, h);
+        ctx.shadowBlur = 16;
+        ctx.strokeStyle = '#fb7185';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([10, 6]);
+        ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+        // Inner subtle highlight
+        ctx.shadowBlur = 0;
+        ctx.setLineDash([]);
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + 2, y + 2, w - 4, h - 4);
         ctx.restore();
       }
     }
@@ -1703,14 +1730,16 @@ class Component extends DCLogic {
     const vFindings = s.vFindings || [];
     const vReveal = s.vReveal;
     const vBoxes = vFindings.map((f, i) => {
-      const r = this.locationToRect(f.rough_location);
-      const col = f.redacted ? '#34d399' : (SEVc[f.severity] || '#fb7185');
+      const r = this.getRect(f);
+      const col = f.redacted ? '#34d39900' : (SEVc[f.severity] || '#fb7185');
       const dl = (0.05 + i * 0.08).toFixed(2);
+      // Hide the box entirely — we draw everything on the canvas now
+      const visible = !f.redacted && vReveal;
       return {
         index: i,
-        label: f.redacted ? '✓ redacted' : String(f.type || '').replace(/_/g, ' '),
-        boxStyle: `position:absolute; left:${r.x}%; top:${r.y}%; width:${r.w}%; height:${r.h}%; border:2px solid ${col}; background:${f.redacted ? 'rgba(52,211,153,.10)' : 'rgba(226,75,74,.14)'}; border-radius:10px; cursor:${f.redacted ? 'default' : 'pointer'}; display:flex; align-items:flex-start; justify-content:flex-start; padding:6px; opacity:${vReveal ? 1 : 0}; transform:scale(${vReveal ? 1 : 1.05}); transition:opacity .4s ease ${dl}s, transform .4s ease ${dl}s, border-color .2s, background .2s;`,
-        tagStyle: `font-size:10px; letter-spacing:.04em; color:#fff; background:rgba(8,8,16,.7); padding:2px 7px; border-radius:6px; pointer-events:none;`,
+        label: f.redacted ? '' : String(f.type || '').replace(/_/g, ' '),
+        boxStyle: `position:absolute; left:${r.x}%; top:${r.y}%; width:${r.w}%; height:${r.h}%; border:${visible ? '2px' : '0px'} solid ${col}; background:transparent; border-radius:6px; cursor:pointer; display:flex; align-items:flex-start; justify-content:flex-start; padding:3px; opacity:${visible ? 1 : 0}; transform:scale(${vReveal ? 1 : 1.05}); transition:opacity .4s ease ${dl}s, transform .4s ease ${dl}s; pointer-events:${visible ? 'auto' : 'none'};`,
+        tagStyle: `font-size:9px; letter-spacing:.04em; color:#fff; background:rgba(8,8,16,.75); padding:1px 5px; border-radius:4px; pointer-events:none; white-space:nowrap;`,
       };
     });
     const vCards = vFindings.map((f, i) => {
