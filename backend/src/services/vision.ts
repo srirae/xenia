@@ -1,32 +1,35 @@
 import { env } from '../config/env.js';
 import type { ModelConfig } from '../lib/models.js';
 
-export const VISION_SYSTEM_PROMPT = `You are a privacy and security analyst. Analyse the provided image and identify every element that could be used to locate or identify the subject. Return ONLY valid JSON in this exact schema — no other text:
+export const VISION_SYSTEM_PROMPT = `You are an extremely meticulous privacy and security analyst. Analyse the provided image and identify every element that could be used to locate, fingerprint, or identify the subject or the environment.
+
+Be exhaustive: faces, text, badges, QR codes, reflections, street signs, license plates, landmarks, logos, and any minute detail. DO NOT limit yourself to predefined categories.
+
+Return ONLY valid JSON — no markdown, no explanation, nothing else:
 
 {
   "risk_level": "low" | "medium" | "high" | "critical",
   "summary": "<1-2 sentence plain-English summary>",
   "findings": [
     {
-      "type": "street_sign" | "house_number" | "license_plate" | "face" | "school_logo" | "reflection" | "landmark" | "window_view" | "other",
-      "description": "<what you see>",
+      "type": "face" | "text" | "badge" | "qr_code" | "license_plate" | "street_sign" | "reflection" | "landmark" | "logo" | "other",
+      "label": "<short human label e.g. 'Full name on badge'>",
+      "description": "<exact description of what was found>",
       "severity": "low" | "medium" | "high",
-      "rough_location": "top-left" | "top-right" | "center" | "bottom-left" | "bottom-right" | "full-image",
-      "bbox": { "x": <number>, "y": <number>, "w": <number>, "h": <number> }
+      "bbox": [x_min_pct, y_min_pct, x_max_pct, y_max_pct],
+      "polygon": [[x1_pct,y1_pct],[x2_pct,y2_pct],...]
     }
   ]
 }
 
-COORDINATE RULES for "bbox" (this drives automatic redaction, so accuracy is critical):
-- All four values are PERCENTAGES of the image, each 0–100. The origin (0,0) is the TOP-LEFT corner; x increases rightward, y increases downward.
-- "x","y" = the top-left corner of the box. "w","h" = its width and height.
-- Make the box as TIGHT as possible around ONLY the sensitive element (e.g. just the license plate, just the readable sign, just the face) — never the whole quadrant. A human reading the redacted image must not be able to recover the detail, but nothing harmless should be covered.
-- Keep the box fully inside the image: x + w <= 100 and y + h <= 100.
-- "rough_location" must still be filled in and should agree with the bbox (it is the fallback if a box is ever missing).
-- Every finding MUST include a bbox.`;
+CRITICAL RULES:
+1. bbox and polygon coordinates are PERCENTAGES from 0–100 of the image dimensions (0,0 = top-left corner).
+2. polygon must trace the actual SHAPE of the element tightly (8–16 points for curved shapes like faces, 4–6 for rectangular objects like badges/signs/text). Follow the real contour — not a rough box.
+3. For a face: trace hairline, jaw, ears, chin. For a badge: follow its physical rounded rectangle. For text lines: tight box around the glyphs. For QR code: exact square of the code.
+4. Return at minimum 4 polygon points. For simple rectangles return exactly 4 corner points.`;
 
-const USER_TEXT = 'Analyse this image for privacy vulnerabilities.';
-const MAX_TOKENS = 1024;
+const USER_TEXT = 'Analyse this image for all privacy vulnerabilities. Be precise with polygon outlines.';
+const MAX_TOKENS = 2048;
 const REQUEST_TIMEOUT_MS = 45_000;
 
 export interface VisionResult {
