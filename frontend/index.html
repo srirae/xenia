@@ -1,748 +1,1533 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./config.js"></script>
-<script src="./support.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="./config.js"></script>
+  <script src="./support.js"></script>
 </head>
+
 <body>
-<x-dc>
-<helmet>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
-  <style>
-    :root, [data-theme="dark"]{
-      --teal:#2dd4bf; --violet:#8b5cf6; --pink:#f472b6;
-      --grad:linear-gradient(120deg,var(--teal),var(--violet),var(--pink));
-      --bg:#000000; --surface:#0c0c12;
-      --card:rgba(255,255,255,.045); --card-hover:rgba(255,255,255,.07);
-      --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.14);
-      --chip:rgba(255,255,255,.03);
-      --ink:#f4f3fb; --muted:rgba(244,243,251,.62); --muted-2:rgba(244,243,251,.46);
-      --btn:#ffffff; --btn-ink:#000000;
-    }
-    [data-theme="light"]{
-      --bg:#f1f1ee; --surface:#ffffff;
-      --card:rgba(0,0,0,.04); --card-hover:rgba(0,0,0,.07);
-      --border:rgba(0,0,0,.1); --border-strong:rgba(0,0,0,.16);
-      --chip:rgba(0,0,0,.03);
-      --ink:#16181d; --muted:rgba(22,24,29,.64); --muted-2:rgba(22,24,29,.5);
-      --btn:#000000; --btn-ink:#ffffff;
-    }
-    *{box-sizing:border-box;}
-    body{margin:0; background:var(--bg); color:var(--ink); transition:background-color .35s ease, color .35s ease; -webkit-font-smoothing:antialiased; font-family:'Newsreader',Georgia,serif;}
-    @property --irisA{ syntax:'<angle>'; initial-value:0deg; inherits:false; }
-    @property --chromeA{ syntax:'<angle>'; initial-value:90deg; inherits:false; }
-    @keyframes irisSpin{ to{ --irisA:360deg; } }
-    @keyframes chromeSpin{ from{ --chromeA:90deg; } to{ --chromeA:450deg; } }
-    @property --aiA{ syntax:'<angle>'; initial-value:0deg; inherits:false; }
-    @keyframes aiSpin{ to{ --aiA:360deg; } }
-    @keyframes textShimmer{0%{background-position:0% 50%;}100%{background-position:300% 50%;}}
-    @keyframes sparkleFloat{0%{opacity:0; transform:translateY(12px) scale(.3);}25%{opacity:1;}55%{opacity:1;}100%{opacity:0; transform:translateY(-34px) scale(1);}}
-    @keyframes tileIn{
-      0%{ transform:translate(var(--sx),var(--sy)) rotate(var(--srot)) scale(.34); opacity:0; filter:blur(16px); }
-      20%{ opacity:1; }
-      52%{ transform:translate(var(--mx),var(--my)) rotate(calc(var(--srot) * .18)) scale(.96); filter:blur(5px); }
-      70%{ transform:translate(0,0) rotate(0deg) scale(1); opacity:1; filter:blur(4px); }
-      85%{ transform:translate(0,0) rotate(0deg) scale(1); filter:blur(3px); }
-      100%{ transform:translate(0,0) rotate(0deg) scale(1); opacity:1; filter:blur(0); }
-    }
-    @keyframes floatUp{0%{opacity:0; transform:translateY(0) scale(.85);}18%{opacity:1;}100%{opacity:0; transform:translateY(-170px) scale(1.08);}}
-    @keyframes spin{to{transform:rotate(360deg);}}
-    @keyframes spinRev{to{transform:rotate(-360deg);}}
-    @keyframes sheen{0%{background-position:200% 0;}100%{background-position:-120% 0;}}
-    @keyframes breathe{0%,100%{transform:scale(1);}50%{transform:scale(1.035);}}
-    @keyframes dotPulse{0%,100%{opacity:1; transform:scale(1);}50%{opacity:.35; transform:scale(.7);}}
-    @keyframes pulseSoft{0%,100%{opacity:.18;}50%{opacity:.4;}}
-    @keyframes riseIn{from{opacity:0; transform:translateY(16px);}to{opacity:1; transform:translateY(0);}}
-    details summary{list-style:none; cursor:pointer;}
-    #brand-logo{ background-color:var(--ink); }
-    @keyframes logoBlink{ 0%{ background-color:var(--gold); } 100%{ background-color:var(--ink); } }
-    .logo-blink{ animation:logoBlink 0.85s ease-out forwards; }
-    .metal-btn{ border:2px solid transparent !important; background:linear-gradient(var(--btn),var(--btn)) padding-box, conic-gradient(from var(--irisA) at 50% 50%, transparent 0deg, #2dffcf 13deg, #2dffcf 17deg, transparent 21deg, transparent 60deg, #38b6ff 73deg, #38b6ff 77deg, transparent 81deg, transparent 130deg, #9b6bff 143deg, #9b6bff 147deg, transparent 151deg, transparent 196deg, #ff5fd0 209deg, #ff5fd0 213deg, transparent 217deg, transparent 262deg, #ffb13d 275deg, #ffb13d 279deg, transparent 283deg, transparent 320deg, #4dff9e 332deg, #4dff9e 336deg, transparent 340deg, transparent 360deg) border-box, conic-gradient(from var(--chromeA) at 50% 50%, #ffffff 0deg, #c4cbd4 7deg, #474d57 18deg, #14161c 28deg, #b0b7c0 42deg, #ffffff 52deg, #565c66 64deg, #1a1d24 76deg, #cdd3db 90deg, #ffffff 100deg, #3c414b 116deg, #101218 130deg, #9aa1aa 148deg, #ffffff 160deg, #4a505a 174deg, #14161c 186deg, #c4cbd4 202deg, #ffffff 214deg, #50565f 230deg, #16181e 244deg, #b0b7c0 262deg, #ffffff 276deg, #3c414b 292deg, #101218 306deg, #aab1ba 326deg, #ffffff 344deg, #ffffff 360deg) border-box !important; color:var(--btn-ink) !important; box-shadow:none !important; animation:irisSpin 15s linear infinite, chromeSpin 24s linear infinite; }
-    .inv-btn{ position:relative; z-index:0; overflow:hidden; transition:color .45s ease; }
-    .inv-btn::before{ content:''; position:absolute; inset:0; z-index:-1; border-radius:inherit; background:var(--btn-ink); transform:scaleX(0); transform-origin:left center; transition:transform .45s ease; }
-    .inv-btn:hover::before{ transform:scaleX(1); }
-    .inv-btn:hover{ color:var(--btn) !important; }
-    .hero-pill{ transition:border-color .25s ease, box-shadow .25s ease, color .25s ease; }
-    .hero-pill:hover{ border-color:#fb4d4d !important; color:#ff6b6b !important; box-shadow:0 0 16px rgba(251,77,77,.5), inset 0 0 9px rgba(251,77,77,.18); }
-    .gold-hover{ border-color:transparent !important; transition:border-color .3s ease; }
-    .gold-hover:hover{ border-color:var(--gold) !important; }
-    details summary::-webkit-details-marker{display:none;}
-    .faq-ic{transition:transform .25s ease;}
-    details[open] .faq-ic{transform:rotate(45deg);}
-    .sample-underline{position:relative; display:inline-block;}
-    .sample-underline::after{content:''; position:absolute; left:0; bottom:1px; height:1.5px; width:100%; background:currentColor; transform:scaleX(0); transform-origin:right center; transition:transform .32s ease;}
-    .sample-underline:hover::after{transform:scaleX(1); transform-origin:left center;}
-    ::view-transition-old(root),::view-transition-new(root){ animation-duration:0.8s; animation-timing-function:cubic-bezier(.4,0,.2,1); }
-    @keyframes toggleOut{ to{ opacity:0; transform:rotateX(90deg); } }
-    @keyframes toggleIn{ from{ opacity:0; transform:rotateX(-90deg); } to{ opacity:1; transform:rotateX(0deg); } }
-    ::view-transition-old(theme-toggle){ animation:toggleOut .55s cubic-bezier(.4,0,.2,1) both; }
-    ::view-transition-new(theme-toggle){ animation:toggleIn .55s cubic-bezier(.4,0,.2,1) both; }
-    :root{ interpolate-size: allow-keywords; }
-    details::details-content{ height:0; opacity:0; overflow:hidden; transition:height .4s cubic-bezier(.4,0,.2,1), opacity .3s ease, content-visibility .4s allow-discrete; }
-    details[open]::details-content{ height:auto; opacity:1; }
-    @media (max-width:760px){
-      header nav{ display:none; }
-      header > div{ padding-left:18px !important; padding-right:18px !important; }
-      section[id]{ padding:60px 18px !important; }
-    }
-  </style>
-</helmet>
+  <x-dc>
+    <helmet>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&display=swap"
+        rel="stylesheet">
+      <style>
+        :root,
+        [data-theme="dark"] {
+          --teal: #2dd4bf;
+          --violet: #8b5cf6;
+          --pink: #f472b6;
+          --grad: linear-gradient(120deg, var(--teal), var(--violet), var(--pink));
+          --bg: #000000;
+          --surface: #0c0c12;
+          --card: rgba(255, 255, 255, .045);
+          --card-hover: rgba(255, 255, 255, .07);
+          --border: rgba(255, 255, 255, .09);
+          --border-strong: rgba(255, 255, 255, .14);
+          --chip: rgba(255, 255, 255, .03);
+          --ink: #f4f3fb;
+          --muted: rgba(244, 243, 251, .62);
+          --muted-2: rgba(244, 243, 251, .46);
+          --btn: #ffffff;
+          --btn-ink: #000000;
+        }
 
-<div data-screen-label="Xyris" style="position:relative; min-height:100vh; overflow:visible; background:var(--bg); color:var(--ink); display:flex; flex-direction:column;">
+        [data-theme="light"] {
+          --bg: #f1f1ee;
+          --surface: #ffffff;
+          --card: rgba(0, 0, 0, .04);
+          --card-hover: rgba(0, 0, 0, .07);
+          --border: rgba(0, 0, 0, .1);
+          --border-strong: rgba(0, 0, 0, .16);
+          --chip: rgba(0, 0, 0, .03);
+          --ink: #16181d;
+          --muted: rgba(22, 24, 29, .64);
+          --muted-2: rgba(22, 24, 29, .5);
+          --btn: #000000;
+          --btn-ink: #ffffff;
+        }
 
-  <sc-if value="{{ grainOn }}" hint-placeholder-val="{{ true }}">
-    <div style="position:fixed; inset:0; z-index:1; pointer-events:none; mix-blend-mode:overlay; opacity:.05; background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%222%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E');"></div>
-  </sc-if>
+        * {
+          box-sizing: border-box;
+        }
 
-  <!-- header -->
-  <header style="position:sticky; top:0; z-index:20; width:100%; background:var(--header-bg, transparent); -webkit-backdrop-filter:var(--header-blur, none); backdrop-filter:var(--header-blur, none); border-bottom:1px solid var(--header-border, transparent); transition:background .3s ease, backdrop-filter .3s ease, border-color .3s ease;">
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:32px; padding:16px 44px; max-width:1460px; width:100%; margin:0 auto;">
-      <div style="display:flex; align-items:center; gap:11px;">
-        <a href="#top" onClick="{{ onLogoClick }}" aria-label="Xyris Vision — home" style="display:flex; align-items:flex-start; text-decoration:none;"><span id="brand-logo" role="img" aria-label="Xyris Vision" style="display:block; width:182px; height:24px; -webkit-mask:url(xyris-logo.png) no-repeat left center / contain; mask:url(xyris-logo.png) no-repeat left center / contain;"></span><sup style="font-family:'Newsreader',Georgia,serif; font-size:10px; letter-spacing:.22em; font-weight:600; color:var(--gold); margin-left:5px; align-self:flex-start; margin-top:2px;">VISION</sup></a>
-      </div>
-      <nav style="position:relative; display:flex; align-items:center; gap:30px;">
-        <a href="#features" onClick="{{ onNavClick }}" style="font-size:14px; color:var(--muted); text-decoration:none; cursor:pointer; transition:color .2s;" style-hover="color:var(--ink);">Features</a>
-        <a href="#privacy" onClick="{{ onNavClick }}" style="font-size:14px; color:var(--muted); text-decoration:none; cursor:pointer; transition:color .2s;" style-hover="color:var(--ink);">Privacy</a>
-        <a href="#pricing" onClick="{{ onNavClick }}" style="font-size:14px; color:var(--muted); text-decoration:none; cursor:pointer; transition:color .2s;" style-hover="color:var(--ink);">Pricing</a>
-        <a href="#faq" onClick="{{ onNavClick }}" style="font-size:14px; color:var(--muted); text-decoration:none; cursor:pointer; transition:color .2s;" style-hover="color:var(--ink);">FAQ</a>
-        <span id="nav-underline" style="position:absolute; bottom:-7px; left:0; width:0; height:2px; border-radius:2px; background:var(--gold); opacity:0; pointer-events:none; transition:left .34s cubic-bezier(.4,0,.2,1), width .34s cubic-bezier(.4,0,.2,1), opacity .25s ease;"></span>
-      </nav>
-      <div style="display:flex; align-items:center; gap:10px;">
-        <sc-if value="{{ showCreditsBadge }}" hint-placeholder-val="{{ false }}">
-          <button onClick="{{ onOpenAccount }}" style="height:34px; padding:0 13px; border-radius:999px; background:var(--chip); border:1px solid var(--border-strong); color:var(--ink); cursor:pointer; font-family:'Newsreader',Georgia,serif; font-size:12.5px;">Credits: {{ balanceText }}</button>
-        </sc-if>
-        <button onClick="{{ onToggleTheme }}" aria-label="Toggle light or dark mode" style="display:flex; align-items:center; gap:9px; height:38px; padding:0 15px; border-radius:999px; background:var(--card); border:1px solid var(--border); color:var(--ink); cursor:pointer; font-family:'Newsreader',Georgia,serif; font-size:14px; view-transition-name:theme-toggle; transition:background .2s, transform .2s;" style-hover="background:var(--card-hover); transform:translateY(-1px);">
-        <span style="position:relative; display:block; width:15px; height:15px; border-radius:50%; border:1.6px solid currentColor; overflow:hidden; flex:none;">
-          <span style="position:absolute; top:-1px; bottom:-1px; left:50%; right:-1px; background:currentColor;"></span>
-        </span>
-        <span id="theme-label">Umbra</span>
-        </button>
-        <sc-if value="{{ showAuth }}" hint-placeholder-val="{{ false }}">
-          <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ onOpenAccount }}" style="height:38px; padding:0 14px; border-radius:999px; background:var(--card); border:1px solid var(--border); color:var(--ink); cursor:pointer; font-family:'Newsreader',Georgia,serif; font-size:13.5px;">Account</button>
-          </sc-if>
-          <sc-if value="{{ notSignedIn }}" hint-placeholder-val="{{ true }}">
-            <button onClick="{{ onSignIn }}" style="height:38px; padding:0 18px; border-radius:999px; background:var(--btn); border:none; color:var(--btn-ink); cursor:pointer; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:13.5px; white-space:nowrap; flex:none;">Sign in</button>
-          </sc-if>
-        </sc-if>
-      </div>
-    </div>
-  </header>
+        body {
+          margin: 0;
+          background: var(--bg);
+          color: var(--ink);
+          transition: background-color .35s ease, color .35s ease;
+          -webkit-font-smoothing: antialiased;
+          font-family: 'Newsreader', Georgia, serif;
+        }
 
-  <main style="position:relative; z-index:2; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:calc(100vh - 70px); padding:24px 24px 60px; width:100%;">
+        @property --irisA {
+          syntax: '<angle>';
+          initial-value: 0deg;
+          inherits: false;
+        }
 
-    <!-- ============ HERO / IDLE ============ -->
-    <sc-if value="{{ stageIdle }}" hint-placeholder-val="{{ true }}">
-      <div id="top" data-screen-label="Home" style="max-width:760px; width:100%; text-align:center; animation:riseIn .7s ease both;">
-        <div style="display:inline-flex; align-items:center; justify-content:center; padding:8px 16px; border-radius:999px; background:var(--card); border:1px solid #2ee06a; font-size:12px; line-height:1; color:var(--muted);">
-          <span style="display:inline-block; transform:translateY(1px);">Fully On-Device · You're in control of your Data</span>
+        @property --chromeA {
+          syntax: '<angle>';
+          initial-value: 90deg;
+          inherits: false;
+        }
+
+        @keyframes irisSpin {
+          to {
+            --irisA: 360deg;
+          }
+        }
+
+        @keyframes chromeSpin {
+          from {
+            --chromeA: 90deg;
+          }
+
+          to {
+            --chromeA: 450deg;
+          }
+        }
+
+        @property --aiA {
+          syntax: '<angle>';
+          initial-value: 0deg;
+          inherits: false;
+        }
+
+        @keyframes aiSpin {
+          to {
+            --aiA: 360deg;
+          }
+        }
+
+        @keyframes textShimmer {
+          0% {
+            background-position: 0% 50%;
+          }
+
+          100% {
+            background-position: 300% 50%;
+          }
+        }
+
+        @keyframes sparkleFloat {
+          0% {
+            opacity: 0;
+            transform: translateY(12px) scale(.3);
+          }
+
+          25% {
+            opacity: 1;
+          }
+
+          55% {
+            opacity: 1;
+          }
+
+          100% {
+            opacity: 0;
+            transform: translateY(-34px) scale(1);
+          }
+        }
+
+        @keyframes tileIn {
+          0% {
+            transform: translate(var(--sx), var(--sy)) rotate(var(--srot)) scale(.34);
+            opacity: 0;
+            filter: blur(16px);
+          }
+
+          20% {
+            opacity: 1;
+          }
+
+          52% {
+            transform: translate(var(--mx), var(--my)) rotate(calc(var(--srot) * .18)) scale(.96);
+            filter: blur(5px);
+          }
+
+          70% {
+            transform: translate(0, 0) rotate(0deg) scale(1);
+            opacity: 1;
+            filter: blur(4px);
+          }
+
+          85% {
+            transform: translate(0, 0) rotate(0deg) scale(1);
+            filter: blur(3px);
+          }
+
+          100% {
+            transform: translate(0, 0) rotate(0deg) scale(1);
+            opacity: 1;
+            filter: blur(0);
+          }
+        }
+
+        @keyframes floatUp {
+          0% {
+            opacity: 0;
+            transform: translateY(0) scale(.85);
+          }
+
+          18% {
+            opacity: 1;
+          }
+
+          100% {
+            opacity: 0;
+            transform: translateY(-170px) scale(1.08);
+          }
+        }
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        @keyframes spinRev {
+          to {
+            transform: rotate(-360deg);
+          }
+        }
+
+        @keyframes sheen {
+          0% {
+            background-position: 200% 0;
+          }
+
+          100% {
+            background-position: -120% 0;
+          }
+        }
+
+        @keyframes breathe {
+
+          0%,
+          100% {
+            transform: scale(1);
+          }
+
+          50% {
+            transform: scale(1.035);
+          }
+        }
+
+        @keyframes dotPulse {
+
+          0%,
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+
+          50% {
+            opacity: .35;
+            transform: scale(.7);
+          }
+        }
+
+        @keyframes pulseSoft {
+
+          0%,
+          100% {
+            opacity: .18;
+          }
+
+          50% {
+            opacity: .4;
+          }
+        }
+
+        @keyframes riseIn {
+          from {
+            opacity: 0;
+            transform: translateY(16px);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        details summary {
+          list-style: none;
+          cursor: pointer;
+        }
+
+        #brand-logo {
+          background-color: var(--ink);
+        }
+
+        @keyframes logoBlink {
+          0% {
+            background-color: var(--gold);
+          }
+
+          100% {
+            background-color: var(--ink);
+          }
+        }
+
+        .logo-blink {
+          animation: logoBlink 0.85s ease-out forwards;
+        }
+
+        .metal-btn {
+          border: 2px solid transparent !important;
+          background: linear-gradient(var(--btn), var(--btn)) padding-box, conic-gradient(from var(--irisA) at 50% 50%, transparent 0deg, #2dffcf 13deg, #2dffcf 17deg, transparent 21deg, transparent 60deg, #38b6ff 73deg, #38b6ff 77deg, transparent 81deg, transparent 130deg, #9b6bff 143deg, #9b6bff 147deg, transparent 151deg, transparent 196deg, #ff5fd0 209deg, #ff5fd0 213deg, transparent 217deg, transparent 262deg, #ffb13d 275deg, #ffb13d 279deg, transparent 283deg, transparent 320deg, #4dff9e 332deg, #4dff9e 336deg, transparent 340deg, transparent 360deg) border-box, conic-gradient(from var(--chromeA) at 50% 50%, #ffffff 0deg, #c4cbd4 7deg, #474d57 18deg, #14161c 28deg, #b0b7c0 42deg, #ffffff 52deg, #565c66 64deg, #1a1d24 76deg, #cdd3db 90deg, #ffffff 100deg, #3c414b 116deg, #101218 130deg, #9aa1aa 148deg, #ffffff 160deg, #4a505a 174deg, #14161c 186deg, #c4cbd4 202deg, #ffffff 214deg, #50565f 230deg, #16181e 244deg, #b0b7c0 262deg, #ffffff 276deg, #3c414b 292deg, #101218 306deg, #aab1ba 326deg, #ffffff 344deg, #ffffff 360deg) border-box !important;
+          color: var(--btn-ink) !important;
+          box-shadow: none !important;
+          animation: irisSpin 15s linear infinite, chromeSpin 24s linear infinite;
+        }
+
+        .inv-btn {
+          position: relative;
+          z-index: 0;
+          overflow: hidden;
+          transition: color .45s ease;
+        }
+
+        .inv-btn::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: -1;
+          border-radius: inherit;
+          background: var(--btn-ink);
+          transform: scaleX(0);
+          transform-origin: left center;
+          transition: transform .45s ease;
+        }
+
+        .inv-btn:hover::before {
+          transform: scaleX(1);
+        }
+
+        .inv-btn:hover {
+          color: var(--btn) !important;
+        }
+
+        .hero-pill {
+          transition: border-color .25s ease, box-shadow .25s ease, color .25s ease;
+        }
+
+        .hero-pill:hover {
+          border-color: #fb4d4d !important;
+          color: #ff6b6b !important;
+          box-shadow: 0 0 16px rgba(251, 77, 77, .5), inset 0 0 9px rgba(251, 77, 77, .18);
+        }
+
+        .gold-hover {
+          border-color: transparent !important;
+          transition: border-color .3s ease;
+        }
+
+        .gold-hover:hover {
+          border-color: var(--gold) !important;
+        }
+
+        details summary::-webkit-details-marker {
+          display: none;
+        }
+
+        .faq-ic {
+          transition: transform .25s ease;
+        }
+
+        details[open] .faq-ic {
+          transform: rotate(45deg);
+        }
+
+        .sample-underline {
+          position: relative;
+          display: inline-block;
+        }
+
+        .sample-underline::after {
+          content: '';
+          position: absolute;
+          left: 0;
+          bottom: 1px;
+          height: 1.5px;
+          width: 100%;
+          background: currentColor;
+          transform: scaleX(0);
+          transform-origin: right center;
+          transition: transform .32s ease;
+        }
+
+        .sample-underline:hover::after {
+          transform: scaleX(1);
+          transform-origin: left center;
+        }
+
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+          animation-duration: 0.8s;
+          animation-timing-function: cubic-bezier(.4, 0, .2, 1);
+        }
+
+        @keyframes toggleOut {
+          to {
+            opacity: 0;
+            transform: rotateX(90deg);
+          }
+        }
+
+        @keyframes toggleIn {
+          from {
+            opacity: 0;
+            transform: rotateX(-90deg);
+          }
+
+          to {
+            opacity: 1;
+            transform: rotateX(0deg);
+          }
+        }
+
+        ::view-transition-old(theme-toggle) {
+          animation: toggleOut .55s cubic-bezier(.4, 0, .2, 1) both;
+        }
+
+        ::view-transition-new(theme-toggle) {
+          animation: toggleIn .55s cubic-bezier(.4, 0, .2, 1) both;
+        }
+
+        :root {
+          interpolate-size: allow-keywords;
+        }
+
+        details::details-content {
+          height: 0;
+          opacity: 0;
+          overflow: hidden;
+          transition: height .4s cubic-bezier(.4, 0, .2, 1), opacity .3s ease, content-visibility .4s allow-discrete;
+        }
+
+        details[open]::details-content {
+          height: auto;
+          opacity: 1;
+        }
+
+        @media (max-width:760px) {
+          header nav {
+            display: none;
+          }
+
+          header>div {
+            padding-left: 18px !important;
+            padding-right: 18px !important;
+          }
+
+          section[id] {
+            padding: 60px 18px !important;
+          }
+        }
+      </style>
+    </helmet>
+
+    <div data-screen-label="Xyris"
+      style="position:relative; min-height:100vh; overflow:visible; background:var(--bg); color:var(--ink); display:flex; flex-direction:column;">
+
+      <sc-if value="{{ grainOn }}" hint-placeholder-val="{{ true }}">
+        <div
+          style="position:fixed; inset:0; z-index:1; pointer-events:none; mix-blend-mode:overlay; opacity:.05; background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%222%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E');">
         </div>
-        <h1 style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:clamp(44px,6.2vw,74px); line-height:1.0; letter-spacing:-.015em; margin:22px 0 0;">
-          Share the moment.<br>Not <span style="font-style:italic; background:linear-gradient(110deg,#2bffe0,#a86bff 50%,#ff4fc8); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 0 26px rgba(168,120,255,.6)) saturate(1.3);">your identity.</span>
-        </h1>
-        <p style="max-width:540px; margin:20px auto 0; font-size:16px; line-height:1.55; color:var(--muted);">
-          Every photo carries hidden GPS, device and timestamp data. Xyris finds it, shows you exactly what leaks — and strips it out before you post. All in your browser. Your images are never stored, and never leave your device.
-        </p>
+      </sc-if>
 
-        <div style="max-width:440px; margin:34px auto 0;">
-          <label for="veil-file" onDragOver="{{ onDragOver }}" onDragLeave="{{ onDragLeave }}" onDrop="{{ onDrop }}" onMouseMove="{{ onCardMove }}" onMouseLeave="{{ onCardLeave }}" style="display:block; padding:3px; border-radius:22px; background:conic-gradient(from var(--irisA) at 50% 50%, transparent 0deg, #2dffcf 13deg, #2dffcf 17deg, transparent 21deg, transparent 60deg, #38b6ff 73deg, #38b6ff 77deg, transparent 81deg, transparent 130deg, #9b6bff 143deg, #9b6bff 147deg, transparent 151deg, transparent 196deg, #ff5fd0 209deg, #ff5fd0 213deg, transparent 217deg, transparent 262deg, #ffb13d 275deg, #ffb13d 279deg, transparent 283deg, transparent 320deg, #4dff9e 332deg, #4dff9e 336deg, transparent 340deg, transparent 360deg), conic-gradient(from var(--chromeA) at 50% 50%, #ffffff 0deg, #c4cbd4 7deg, #474d57 18deg, #14161c 28deg, #b0b7c0 42deg, #ffffff 52deg, #565c66 64deg, #1a1d24 76deg, #cdd3db 90deg, #ffffff 100deg, #3c414b 116deg, #101218 130deg, #9aa1aa 148deg, #ffffff 160deg, #4a505a 174deg, #14161c 186deg, #c4cbd4 202deg, #ffffff 214deg, #50565f 230deg, #16181e 244deg, #b0b7c0 262deg, #ffffff 276deg, #3c414b 292deg, #101218 306deg, #aab1ba 326deg, #ffffff 344deg, #ffffff 360deg); background-size:100% 100%, 100% 100%; background-blend-mode:normal, normal; animation:irisSpin 15s linear infinite, chromeSpin 24s linear infinite; box-shadow:inset 0 1px 1px rgba(255,255,255,.65); cursor:pointer; transition:transform .14s ease, box-shadow .25s, filter .25s; transform-style:preserve-3d; will-change:transform;" style-hover="filter:brightness(1.08); box-shadow:inset 0 1px 1px rgba(255,255,255,.7);">
-            <div style="position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; gap:15px; padding:43px 30px; border-radius:19px; background:var(--surface); box-shadow:inset 0 1px 3px rgba(0,0,0,.12);">
-              <div style="position:relative; z-index:2; text-align:center;">
-                <div style="font-family:'Newsreader',Georgia,serif; font-size:18px; font-weight:600;">Drop a photo to scan it</div>
-                <div style="margin-top:5px; font-size:13px; color:var(--muted);">Any image format · never leaves your device</div>
+      <!-- header -->
+      <header
+        style="position:sticky; top:0; z-index:20; width:100%; background:var(--header-bg, transparent); -webkit-backdrop-filter:var(--header-blur, none); backdrop-filter:var(--header-blur, none); border-bottom:1px solid var(--header-border, transparent); transition:background .3s ease, backdrop-filter .3s ease, border-color .3s ease;">
+        <div
+          style="display:flex; align-items:center; justify-content:space-between; gap:32px; padding:16px 44px; width:100%; margin:0 auto;">
+          <div style="display:flex; align-items:center; gap:11px;">
+            <a href="#top" onClick="{{ onLogoClick }}" aria-label="Xyris Vision — home"
+              style="display:flex; align-items:flex-start; text-decoration:none;"><span id="brand-logo" role="img"
+                aria-label="Xyris Vision"
+                style="display:block; width:182px; height:24px; -webkit-mask:url(xyris-logo.png) no-repeat left center / contain; mask:url(xyris-logo.png) no-repeat left center / contain;"></span><sup
+                style="font-family:'Newsreader',Georgia,serif; font-size:10px; letter-spacing:.22em; font-weight:600; color:var(--gold); margin-left:5px; align-self:flex-start; margin-top:2px;">VISION</sup></a>
+          </div>
+          <nav style="position:relative; display:flex; align-items:center; gap:30px;">
+            <a href="#features" onClick="{{ onNavClick }}"
+              style="font-size:14px; color:var(--muted); text-decoration:none; cursor:pointer; transition:color .2s;"
+              style-hover="color:var(--ink);">Features</a>
+            <a href="#privacy" onClick="{{ onNavClick }}"
+              style="font-size:14px; color:var(--muted); text-decoration:none; cursor:pointer; transition:color .2s;"
+              style-hover="color:var(--ink);">Privacy</a>
+            <a href="#pricing" onClick="{{ onNavClick }}"
+              style="font-size:14px; color:var(--muted); text-decoration:none; cursor:pointer; transition:color .2s;"
+              style-hover="color:var(--ink);">Pricing</a>
+            <a href="#faq" onClick="{{ onNavClick }}"
+              style="font-size:14px; color:var(--muted); text-decoration:none; cursor:pointer; transition:color .2s;"
+              style-hover="color:var(--ink);">FAQ</a>
+            <span id="nav-underline"
+              style="position:absolute; bottom:-7px; left:0; width:0; height:2px; border-radius:2px; background:var(--gold); opacity:0; pointer-events:none; transition:left .34s cubic-bezier(.4,0,.2,1), width .34s cubic-bezier(.4,0,.2,1), opacity .25s ease;"></span>
+          </nav>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <sc-if value="{{ showCreditsBadge }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ onOpenAccount }}"
+                style="height:34px; padding:0 13px; border-radius:999px; background:var(--chip); border:1px solid var(--border-strong); color:var(--ink); cursor:pointer; font-family:'Newsreader',Georgia,serif; font-size:12.5px;">Credits:
+                {{ balanceText }}</button>
+            </sc-if>
+            <button onClick="{{ onToggleTheme }}" aria-label="Toggle light or dark mode"
+              style="display:flex; align-items:center; gap:9px; height:38px; padding:0 15px; border-radius:999px; background:var(--card); border:1px solid var(--border); color:var(--ink); cursor:pointer; font-family:'Newsreader',Georgia,serif; font-size:14px; view-transition-name:theme-toggle; transition:background .2s, transform .2s;"
+              style-hover="background:var(--card-hover); transform:translateY(-1px);">
+              <span
+                style="position:relative; display:block; width:15px; height:15px; border-radius:50%; border:1.6px solid currentColor; overflow:hidden; flex:none;">
+                <span
+                  style="position:absolute; top:-1px; bottom:-1px; left:50%; right:-1px; background:currentColor;"></span>
+              </span>
+              <span id="theme-label">Umbra</span>
+            </button>
+            <sc-if value="{{ showAuth }}" hint-placeholder-val="{{ false }}">
+              <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ onOpenAccount }}"
+                  style="height:38px; padding:0 14px; border-radius:999px; background:var(--card); border:1px solid var(--border); color:var(--ink); cursor:pointer; font-family:'Newsreader',Georgia,serif; font-size:13.5px;">Account</button>
+              </sc-if>
+              <sc-if value="{{ notSignedIn }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ onSignIn }}"
+                  style="height:38px; padding:0 18px; border-radius:999px; background:var(--btn); border:none; color:var(--btn-ink); cursor:pointer; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:13.5px; white-space:nowrap; flex:none;">Sign
+                  in</button>
+              </sc-if>
+            </sc-if>
+          </div>
+        </div>
+      </header>
+
+      <main
+        style="position:relative; z-index:2; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:calc(100vh - 70px); padding:24px 24px 60px; width:100%;">
+
+        <!-- ============ HERO / IDLE ============ -->
+        <sc-if value="{{ stageIdle }}" hint-placeholder-val="{{ true }}">
+          <div id="top" data-screen-label="Home"
+            style="max-width:760px; width:100%; text-align:center; animation:riseIn .7s ease both;">
+            <div
+              style="display:inline-flex; align-items:center; justify-content:center; padding:8px 16px; border-radius:999px; background:var(--card); border:1px solid #2ee06a; font-size:12px; line-height:1; color:var(--muted);">
+              <span style="display:inline-block; transform:translateY(1px);">Fully On-Device · You're in control of your
+                Data</span>
+            </div>
+            <h1
+              style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:clamp(44px,6.2vw,74px); line-height:1.0; letter-spacing:-.015em; margin:22px 0 0;">
+              Share the moment.<br>Not <span
+                style="font-style:italic; background:linear-gradient(110deg,#2bffe0,#a86bff 50%,#ff4fc8); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 0 26px rgba(168,120,255,.6)) saturate(1.3);">your
+                identity.</span>
+            </h1>
+            <p style="max-width:540px; margin:20px auto 0; font-size:16px; line-height:1.55; color:var(--muted);">
+              Every photo carries hidden GPS, device and timestamp data. Xyris finds it, shows you exactly what leaks —
+              and strips it out before you post. All in your browser. Your images are never stored, and never leave your
+              device.
+            </p>
+
+            <div style="max-width:440px; margin:34px auto 0;">
+              <label for="veil-file" onDragOver="{{ onDragOver }}" onDragLeave="{{ onDragLeave }}" onDrop="{{ onDrop }}"
+                onMouseMove="{{ onCardMove }}" onMouseLeave="{{ onCardLeave }}"
+                style="display:block; padding:3px; border-radius:22px; background:conic-gradient(from var(--irisA) at 50% 50%, transparent 0deg, #2dffcf 13deg, #2dffcf 17deg, transparent 21deg, transparent 60deg, #38b6ff 73deg, #38b6ff 77deg, transparent 81deg, transparent 130deg, #9b6bff 143deg, #9b6bff 147deg, transparent 151deg, transparent 196deg, #ff5fd0 209deg, #ff5fd0 213deg, transparent 217deg, transparent 262deg, #ffb13d 275deg, #ffb13d 279deg, transparent 283deg, transparent 320deg, #4dff9e 332deg, #4dff9e 336deg, transparent 340deg, transparent 360deg), conic-gradient(from var(--chromeA) at 50% 50%, #ffffff 0deg, #c4cbd4 7deg, #474d57 18deg, #14161c 28deg, #b0b7c0 42deg, #ffffff 52deg, #565c66 64deg, #1a1d24 76deg, #cdd3db 90deg, #ffffff 100deg, #3c414b 116deg, #101218 130deg, #9aa1aa 148deg, #ffffff 160deg, #4a505a 174deg, #14161c 186deg, #c4cbd4 202deg, #ffffff 214deg, #50565f 230deg, #16181e 244deg, #b0b7c0 262deg, #ffffff 276deg, #3c414b 292deg, #101218 306deg, #aab1ba 326deg, #ffffff 344deg, #ffffff 360deg); background-size:100% 100%, 100% 100%; background-blend-mode:normal, normal; animation:irisSpin 15s linear infinite, chromeSpin 24s linear infinite; box-shadow:inset 0 1px 1px rgba(255,255,255,.65); cursor:pointer; transition:transform .14s ease, box-shadow .25s, filter .25s; transform-style:preserve-3d; will-change:transform;"
+                style-hover="filter:brightness(1.08); box-shadow:inset 0 1px 1px rgba(255,255,255,.7);">
+                <div
+                  style="position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; gap:22px; padding:38px 30px; border-radius:19px; background:var(--surface); box-shadow:inset 0 1px 3px rgba(0,0,0,.12);">
+                  <div style="position:relative; z-index:2; text-align:center;">
+                    <div style="font-family:'Newsreader',Georgia,serif; font-size:18px; font-weight:600;">Drop a photo
+                      to scan it</div>
+                    <div style="margin-top:5px; font-size:13px; color:var(--muted);">Any image format · Never leaves
+                      your device</div>
+                  </div>
+                  <div
+                    style="position:relative; z-index:2; display:inline-flex; align-items:center; gap:9px; white-space:nowrap; padding:11px 20px 11px 18px; border-radius:12px; color:var(--btn-ink); background:var(--btn); box-shadow:0 3px 10px rgba(0,0,0,.18); transition:transform .2s, box-shadow .2s, background .35s ease, color .35s ease;">
+                    <span style="position:relative; display:inline-block; width:15px; height:16px;">
+                      <span
+                        style="position:absolute; left:50%; top:0; transform:translateX(-50%); width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:6px solid currentColor;"></span>
+                      <span
+                        style="position:absolute; left:50%; top:5px; transform:translateX(-50%); width:2px; height:6px; background:currentColor;"></span>
+                      <span
+                        style="position:absolute; left:0; bottom:0; width:15px; height:5px; border:2px solid currentColor; border-top:none; border-radius:0 0 2px 2px;"></span>
+                    </span>
+                    <span
+                      style="font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:15px; letter-spacing:.01em;">Upload
+                      file</span>
+                  </div>
+                  <sc-if value="{{ dragOver }}" hint-placeholder-val="{{ false }}">
+                    <div
+                      style="position:absolute; inset:0; z-index:3; border-radius:19px; background:rgba(45,212,191,.16); display:flex; align-items:center; justify-content:center; font-family:'Newsreader',Georgia,serif; font-weight:500; color:var(--teal); letter-spacing:.02em;">
+                      Drop to scan</div>
+                  </sc-if>
+                </div>
+              </label>
+              <input id="veil-file" type="file" accept="image/*" onChange="{{ onPick }}" style="display:none;">
+              <input id="batch-file" type="file" accept="image/*" multiple onChange="{{ onBatchPick }}"
+                style="display:none;">
+
+              <div style="display:flex; align-items:center; justify-content:center; gap:16px; margin-top:18px;">
+                <button onClick="{{ onSample }}" class="sample-underline"
+                  style="background:none; border:none; cursor:pointer; font-family:'Newsreader',Georgia,serif; font-size:14px; color:var(--ink); padding:6px 4px; transition:opacity .2s;"
+                  style-hover="opacity:.7;">Try a sample photo →</button>
+                <span style="color:var(--muted-2);">·</span>
+                <button onClick="{{ onAddMoreBatch }}" class="sample-underline"
+                  style="background:none; border:none; cursor:pointer; font-family:'Newsreader',Georgia,serif; font-size:14px; color:var(--ink); padding:6px 4px; transition:opacity .2s;"
+                  style-hover="opacity:.7;">Clean several at once →</button>
               </div>
-              <div style="position:relative; z-index:2; display:inline-flex; align-items:center; gap:9px; white-space:nowrap; padding:11px 20px 11px 18px; border-radius:12px; color:var(--btn-ink); background:var(--btn); box-shadow:0 3px 10px rgba(0,0,0,.18); transition:transform .2s, box-shadow .2s, background .35s ease, color .35s ease;">
-                <span style="position:relative; display:inline-block; width:15px; height:16px;">
-                  <span style="position:absolute; left:50%; top:0; transform:translateX(-50%); width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:6px solid currentColor;"></span>
-                  <span style="position:absolute; left:50%; top:5px; transform:translateX(-50%); width:2px; height:6px; background:currentColor;"></span>
-                  <span style="position:absolute; left:0; bottom:0; width:15px; height:5px; border:2px solid currentColor; border-top:none; border-radius:0 0 2px 2px;"></span>
-                </span>
-                <span style="font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:15px; letter-spacing:.01em;">Upload file</span>
-              </div>
-              <sc-if value="{{ dragOver }}" hint-placeholder-val="{{ false }}">
-                <div style="position:absolute; inset:0; z-index:3; border-radius:19px; background:rgba(45,212,191,.16); display:flex; align-items:center; justify-content:center; font-family:'Newsreader',Georgia,serif; font-weight:500; color:var(--teal); letter-spacing:.02em;">Drop to scan</div>
+              <sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:10px; font-size:13px; color:#fb7185;">{{ error }}</div>
               </sc-if>
             </div>
-          </label>
-          <input id="veil-file" type="file" accept="image/*" onChange="{{ onPick }}" style="display:none;">
-          <input id="batch-file" type="file" accept="image/*" multiple onChange="{{ onBatchPick }}" style="display:none;">
 
-          <div style="display:flex; align-items:center; justify-content:center; gap:16px; margin-top:18px;">
-            <button onClick="{{ onSample }}" class="sample-underline" style="background:none; border:none; cursor:pointer; font-family:'Newsreader',Georgia,serif; font-size:14px; color:var(--ink); padding:6px 4px; transition:opacity .2s;" style-hover="opacity:.7;">Try a sample photo →</button>
-            <span style="color:var(--muted-2);">·</span>
-            <button onClick="{{ onAddMoreBatch }}" class="sample-underline" style="background:none; border:none; cursor:pointer; font-family:'Newsreader',Georgia,serif; font-size:14px; color:var(--ink); padding:6px 4px; transition:opacity .2s;" style-hover="opacity:.7;">Clean several at once →</button>
-          </div>
-          <sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}">
-            <div style="margin-top:10px; font-size:13px; color:#fb7185;">{{ error }}</div>
-          </sc-if>
-        </div>
-
-        <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:30px;">
-          <span class="hero-pill" style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.05em; color:var(--muted-2); padding:6px 11px; border-radius:999px; border:1px solid var(--border); background:var(--chip);">GPS location</span>
-          <span class="hero-pill" style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.05em; color:var(--muted-2); padding:6px 11px; border-radius:999px; border:1px solid var(--border); background:var(--chip);">Camera &amp; device</span>
-          <span class="hero-pill" style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.05em; color:var(--muted-2); padding:6px 11px; border-radius:999px; border:1px solid var(--border); background:var(--chip);">Date &amp; time</span>
-          <span class="hero-pill" style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.05em; color:var(--muted-2); padding:6px 11px; border-radius:999px; border:1px solid var(--border); background:var(--chip);">Software</span>
-          <span class="hero-pill" style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.05em; color:var(--muted-2); padding:6px 11px; border-radius:999px; border:1px solid var(--border); background:var(--chip);">Faces</span>
-        </div>
-      </div>
-    </sc-if>
-
-    <!-- ============ PROCESSING (Apple Intelligence style) ============ -->
-    <sc-if value="{{ stageAnalyzing }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Processing" style="display:flex; flex-direction:column; align-items:center; gap:32px; animation:riseIn .5s ease both;">
-        <div style="position:relative; width:min(86vw,440px);">
-          <div style="position:absolute; inset:-24px; border-radius:34px; background:conic-gradient(from var(--aiA), #ff5e9c, #c06bff, #5b8cff, #34e0c7, #ffd23f, #ff7a45, #ff5e9c); filter:blur(28px); opacity:.85; animation:aiSpin 5.5s linear infinite; pointer-events:none;"></div>
-          <div style="position:absolute; inset:-5px; border-radius:24px; background:conic-gradient(from var(--aiA), #ff5e9c, #c06bff, #5b8cff, #34e0c7, #ffd23f, #ff7a45, #ff5e9c); filter:blur(7px); opacity:.75; animation:aiSpin 5.5s linear infinite reverse; pointer-events:none;"></div>
-          <div style="position:relative; aspect-ratio:{{ imgAspect }}; box-shadow:0 30px 70px rgba(0,0,0,.5); border-radius:18px; contain:paint; isolation:isolate;">
-            <sc-for list="{{ photoTiles }}" as="tile" hint-placeholder-count="0">
-              <div style="{{ tile.style }}"></div>
-            </sc-for>
-            <div style="position:absolute; inset:0; background:linear-gradient(115deg, transparent 32%, rgba(255,255,255,.5) 50%, transparent 68%); background-size:250% 100%; mix-blend-mode:overlay; animation:sheen 2.6s ease-in-out infinite; pointer-events:none;"></div>
-            <div style="position:absolute; inset:0; background:radial-gradient(circle at 50% 45%, rgba(255,255,255,.18), transparent 60%); animation:pulseSoft 2.4s ease-in-out infinite; pointer-events:none;"></div>
-            <sc-for list="{{ sparkles }}" as="sp" hint-placeholder-count="0">
-              <div style="{{ sp.style }}"></div>
-            </sc-for>
-          </div>
-        </div>
-        <div style="text-align:center;">
-          <div style="font-family:'Instrument Serif',Georgia,serif; font-size:clamp(24px,4vw,32px); background:linear-gradient(110deg,#ff5e9c,#c06bff,#5b8cff,#34e0c7,#ffd23f,#ff5e9c); background-size:300% auto; -webkit-background-clip:text; background-clip:text; color:transparent; animation:textShimmer 4s linear infinite;">Reading your photo…</div>
-          <div style="margin-top:10px; font-size:14px; color:var(--muted);">Looking for hidden location, device &amp; identity data</div>
-        </div>
-      </div>
-    </sc-if>
-
-    <!-- ============ ANALYSIS (scanning + results) ============ -->
-    <sc-if value="{{ stageResults }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Analysis" style="width:100%; max-width:1060px; margin:0 auto; animation:riseIn .5s ease both;">
-        <button onClick="{{ onReset }}" style="background:none; border:none; cursor:pointer; font-size:13px; color:var(--muted); padding:6px 0; font-family:'Newsreader',Georgia,serif; transition:color .2s;" style-hover="color:var(--ink);">← Scan a different photo</button>
-
-        <div style="display:flex; gap:30px; align-items:flex-start; margin-top:14px; flex-wrap:wrap;">
-          <!-- photo -->
-          <div style="flex:1 1 420px; min-width:320px; display:flex; justify-content:center;">
-            <div style="position:relative; width:100%; max-width:640px; border-radius:18px; overflow:hidden; box-shadow:0 34px 80px rgba(0,0,0,.55); border:1px solid var(--border);">
-              {{ analysisImg }}
-              <div style="position:absolute; inset:0; background:linear-gradient(transparent 60%, rgba(8,8,16,.3)); pointer-events:none;"></div>
-              <div style="position:absolute; inset:0; background-image:linear-gradient(rgba(124,200,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(124,200,255,.05) 1px,transparent 1px); background-size:42px 42px; mix-blend-mode:screen; pointer-events:none;"></div>
-              <sc-for list="{{ faceBoxes }}" as="fb" hint-placeholder-count="0">
-                <div style="{{ fb.style }}"></div>
-              </sc-for>
-              <sc-for list="{{ pins }}" as="pin" hint-placeholder-count="0">
-                <div style="{{ pin.style }}">
-                  <span style="{{ pin.dotStyle }}"></span>
-                  <span style="{{ pin.tagStyle }}">{{ pin.tag }}</span>
-                  <span style="{{ pin.valStyle }}">{{ pin.value }}</span>
-                </div>
-              </sc-for>
+            <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:30px;">
+              <span class="hero-pill"
+                style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.05em; color:var(--muted-2); padding:6px 11px; border-radius:999px; border:1px solid var(--border); background:var(--chip);">GPS
+                location</span>
+              <span class="hero-pill"
+                style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.05em; color:var(--muted-2); padding:6px 11px; border-radius:999px; border:1px solid var(--border); background:var(--chip);">Camera
+                &amp; device</span>
+              <span class="hero-pill"
+                style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.05em; color:var(--muted-2); padding:6px 11px; border-radius:999px; border:1px solid var(--border); background:var(--chip);">Date
+                &amp; time</span>
+              <span class="hero-pill"
+                style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.05em; color:var(--muted-2); padding:6px 11px; border-radius:999px; border:1px solid var(--border); background:var(--chip);">Software</span>
+              <span class="hero-pill"
+                style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.05em; color:var(--muted-2); padding:6px 11px; border-radius:999px; border:1px solid var(--border); background:var(--chip);">Faces</span>
             </div>
-          </div>
-
-          <!-- panel -->
-          <div style="flex:0 0 360px; max-width:360px; display:flex; flex-direction:column; gap:13px;">
-            <div style="display:flex; align-items:center; gap:8px; font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.16em; color:var(--teal);">
-              <span style="width:6px; height:6px; border-radius:50%; background:var(--teal); box-shadow:0 0 8px var(--teal); animation:dotPulse 1.4s ease-in-out infinite;"></span>
-              {{ panelKicker }}
-            </div>
-            <h2 style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:28px; line-height:1.08; letter-spacing:0; margin:0;"><span style="text-decoration:underline; text-underline-offset:3px;">{{ panelCount }}</span>{{ panelTitleRest }}</h2>
-            <p style="margin:0; font-size:13.5px; line-height:1.5; color:var(--muted);">{{ panelSub }}</p>
-
-            <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
-              <sc-for list="{{ leakCards }}" as="card" hint-placeholder-count="0">
-                <div style="{{ card.style }}">
-                  <div style="{{ card.barStyle }}"></div>
-                  <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="{{ card.dotStyle }}"></span>
-                    <span style="{{ card.tagStyle }}">{{ card.tag }}</span>
-                    <span style="{{ card.sevStyle }}">{{ card.sevLabel }}</span>
-                  </div>
-                  <div style="margin-top:8px; font-family:'Newsreader',Georgia,serif; font-weight:500; font-size:14.5px;">{{ card.title }}</div>
-                  <div style="margin-top:3px; font-family:'Newsreader',Georgia,serif; font-size:12px; color:var(--ink); word-break:break-word;">{{ card.value }}</div>
-                  <div style="{{ card.placeWrapStyle }}"><span style="{{ card.placeDotStyle }}"></span><span style="{{ card.placeTextStyle }}">{{ card.place }}</span></div>
-                  <div style="margin-top:5px; font-size:12px; line-height:1.45; color:var(--muted-2);">{{ card.detail }}</div>
-                </div>
-              </sc-for>
-            </div>
-
-            <sc-if value="{{ showCTA }}" hint-placeholder-val="{{ false }}">
-              <div style="margin-top:6px;">
-                <button class="metal-btn inv-btn" onClick="{{ onClean }}" style="width:100%; border:none; cursor:pointer; padding:15px; border-radius:13px; background:var(--btn); color:var(--btn-ink); font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:15px;">{{ ctaLabel }}</button>
-                <div style="margin-top:9px; font-size:11.5px; line-height:1.4; color:var(--muted-2); text-align:center;">{{ ctaNote }}</div>
-              </div>
-            </sc-if>
-          </div>
-        </div>
-
-        <!-- ===== AI VISUAL SCAN (migrated feature) ===== -->
-        <div style="margin-top:30px; border-top:1px solid var(--border); padding-top:26px;">
-          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            <span style="width:6px; height:6px; border-radius:50%; background:var(--violet); box-shadow:0 0 8px var(--violet);"></span>
-            <span style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.16em; color:var(--violet);">VISIBLE-IMAGE SCAN · AI</span>
-            <sc-if value="{{ vIsDemo }}" hint-placeholder-val="{{ false }}">
-              <span style="font-family:'Newsreader',Georgia,serif; font-size:9px; letter-spacing:.1em; color:var(--muted-2); border:1px solid var(--border); border-radius:999px; padding:2px 8px;">DEMO</span>
-            </sc-if>
-          </div>
-
-          <sc-if value="{{ vCollapsed }}" hint-placeholder-val="{{ true }}">
-            <div style="margin-top:16px; display:flex; gap:20px; align-items:center; flex-wrap:wrap; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px 24px;">
-              <div style="flex:1 1 320px;">
-                <div style="font-family:'Instrument Serif',Georgia,serif; font-size:24px; line-height:1.1;">Metadata's gone. Now check the picture itself.</div>
-                <div style="margin-top:7px; font-size:13.5px; line-height:1.55; color:var(--muted);">An AI model looks for street signs, license plates, house numbers, reflections and landmarks that give away where you are — then lets you blur each one and download a redacted copy.</div>
-                <sc-if value="{{ showDemoNote }}" hint-placeholder-val="{{ false }}">
-                  <div style="margin-top:10px; font-size:12px; color:var(--muted-2);">This is a demo scan. <button onClick="{{ onGoPlans }}" style="background:none; border:none; padding:0; color:var(--gold); cursor:pointer; font-family:'Newsreader',Georgia,serif; font-size:12px; text-decoration:underline;">Upgrade</button> to scan for real.</div>
-                </sc-if>
-              </div>
-              <button onClick="{{ onRunVisual }}" style="flex:none; border:none; cursor:pointer; padding:14px 24px; border-radius:13px; background:var(--btn); color:var(--btn-ink); font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:15px; transition:transform .2s, opacity .2s;" style-hover="opacity:.9;">Run AI visual scan</button>
-            </div>
-          </sc-if>
-
-          <sc-if value="{{ vScanning }}" hint-placeholder-val="{{ false }}">
-            <div style="margin-top:18px; text-align:center; padding:34px 0;">
-              <div style="font-family:'Instrument Serif',Georgia,serif; font-size:clamp(22px,4vw,30px); background:linear-gradient(110deg,#ff5e9c,#c06bff,#5b8cff,#34e0c7,#ffd23f,#ff5e9c); background-size:300% auto; -webkit-background-clip:text; background-clip:text; color:transparent; animation:textShimmer 4s linear infinite;">Scanning for what leaks…</div>
-              <div style="margin-top:8px; font-size:13.5px; color:var(--muted);">Analysing the image for visible privacy risks</div>
-            </div>
-          </sc-if>
-
-          <sc-if value="{{ vErrorState }}" hint-placeholder-val="{{ false }}">
-            <div style="margin-top:16px; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; font-size:13.5px; color:#fb7185;">
-              {{ vError }}
-              <button onClick="{{ onRunVisual }}" style="margin-left:8px; background:none; border:none; color:var(--ink); cursor:pointer; font-family:'Newsreader',Georgia,serif; text-decoration:underline;">Try again</button>
-            </div>
-          </sc-if>
-
-          <sc-if value="{{ vResults }}" hint-placeholder-val="{{ false }}">
-            <div style="margin-top:18px; display:flex; gap:30px; align-items:flex-start; flex-wrap:wrap;">
-              <div style="flex:1 1 420px; min-width:320px;">
-                <div id="ai-canvas-wrap" style="position:relative; width:100%; border-radius:18px; overflow:hidden; border:1px solid var(--border); box-shadow:0 34px 80px rgba(0,0,0,.45);">
-                  <canvas id="ai-canvas" onMouseMove="{{ onCanvasMouseMove }}" onMouseLeave="{{ onCanvasMouseLeave }}" onClick="{{ onCanvasClick }}" style="display:block; width:100%; height:auto; cursor:crosshair;"></canvas>
-                  <div id="ai-lasso-tip" style="position:absolute; pointer-events:none; display:none; background:rgba(8,8,16,.88); border:1px solid rgba(255,255,255,.14); color:#fff; font-family:'Newsreader',Georgia,serif; font-size:12px; letter-spacing:.04em; padding:5px 10px; border-radius:8px; white-space:nowrap; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:10;"></div>
-                </div>
-              </div>
-              <div style="flex:0 0 360px; max-width:360px; display:flex; flex-direction:column; gap:13px;">
-                <div style="display:flex; align-items:center; gap:8px; font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.16em; color:var(--teal);">
-                  <span style="width:6px; height:6px; border-radius:50%; background:{{ vRiskDot }}; box-shadow:0 0 8px {{ vRiskDot }};"></span>
-                  EXPOSURE REPORT
-                </div>
-                <h3 style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:26px; line-height:1.08; margin:2px 0 0;">{{ vTitle }}</h3>
-                <sc-if value="{{ hasVSummary }}" hint-placeholder-val="{{ false }}">
-                  <p style="margin:0; font-size:13.5px; line-height:1.5; color:var(--muted);">{{ vSummary }}</p>
-                </sc-if>
-                <sc-if value="{{ vHasFindings }}" hint-placeholder-val="{{ false }}">
-                  <div style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.1em; color:var(--muted-2); text-transform:uppercase; margin-top:2px;">Visible vulnerabilities — hover then click lasso to redact</div>
-                  <div style="display:flex; flex-direction:column; gap:10px;">
-                    <sc-for list="{{ vCards }}" as="c" hint-placeholder-count="0">
-                      <div onMouseEnter="{{ onCardHover }}" onMouseLeave="{{ onCardLeaveHover }}" data-index="{{ c.index }}" style="border-radius:14px; padding:12px 14px; position:relative; background:var(--card); border:1px solid var(--border); transition: border-color 0.2s;" style-hover="border-color:var(--pink);">
-                        <div style="display:flex; align-items:center; gap:8px;">
-                          <span style="font-family:'Newsreader',Georgia,serif; font-size:10px; letter-spacing:.1em; color:{{ c.sevColor }};">{{ c.type }}</span>
-                          <span style="margin-left:auto; font-family:'Newsreader',Georgia,serif; font-size:9px; color:{{ c.sevColor }}; border:1px solid {{ c.sevColor }}55; padding:2px 7px; border-radius:6px;">{{ c.sevLabel }}</span>
-                        </div>
-                        <div style="margin-top:6px; font-size:13px; line-height:1.45; color:var(--muted);">{{ c.desc }}</div>
-                        <button data-index="{{ c.index }}" onClick="{{ redactFinding }}" style="{{ c.btnStyle }}">{{ c.btnLabel }}</button>
-                      </div>
-                    </sc-for>
-                  </div>
-                </sc-if>
-                <div style="margin-top:6px; display:flex; flex-direction:column; gap:10px;">
-                  <button class="metal-btn inv-btn" onClick="{{ onDownloadStripped }}" style="width:100%; border:none; cursor:pointer; padding:14px; border-radius:13px; background:var(--btn); color:var(--btn-ink); font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:15px;">Download (metadata stripped) ↓</button>
-                  <sc-if value="{{ canDownloadRedacted }}" hint-placeholder-val="{{ false }}">
-                    <button class="metal-btn inv-btn" onClick="{{ onDownloadRedacted }}" style="width:100%; border:none; cursor:pointer; padding:14px; border-radius:13px; background:var(--grad); color:#0a0a12; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:15px; box-shadow:0 14px 34px rgba(139,92,246,.35); transition:transform .2s;" style-hover="transform:translateY(-2px);">Download clean image (redacted) ↓</button>
-                  </sc-if>
-                  <sc-if value="{{ vLockedDownload }}" hint-placeholder-val="{{ true }}">
-                    <div style="border-radius:12px; padding:14px; text-align:center; background:var(--card); border:1px solid var(--border);">
-                      <div style="font-family:'Newsreader',Georgia,serif; font-size:13px; font-weight:600;">Redacted download is a paid feature</div>
-                      <div style="margin-top:4px; font-size:11.5px; color:var(--muted-2); line-height:1.4;">Redactions show on screen but aren't saved into the free download. Upgrade to export a fully redacted image.</div>
-                      <button onClick="{{ onGoPlans }}" style="margin-top:10px; background:none; border:none; color:var(--gold); cursor:pointer; font-family:'Newsreader',Georgia,serif; font-size:13px;">See plans →</button>
-                    </div>
-                  </sc-if>
-                </div>
-              </div>
-            </div>
-          </sc-if>
-        </div>
-      </div>
-    </sc-if>
-
-    <!-- ============ CLEANING ============ -->
-    <sc-if value="{{ stageCleaning }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Cleaning" style="display:flex; flex-direction:column; align-items:center; gap:26px; animation:riseIn .4s ease both;">
-        <div style="display:flex; align-items:center; gap:8px; font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.18em; color:var(--pink);">
-          <span style="width:6px; height:6px; border-radius:50%; background:var(--pink); box-shadow:0 0 8px var(--pink); animation:dotPulse 1s ease-in-out infinite;"></span>
-          SCRUBBING METADATA
-        </div>
-        <div style="position:relative; width:100%; max-width:520px; border-radius:18px; overflow:hidden; box-shadow:0 34px 80px rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.1);">
-          {{ cleaningImg }}
-          <div style="position:absolute; inset:0; background:var(--grad); mix-blend-mode:color; opacity:.25; animation:pulseSoft 2.4s ease-in-out infinite; pointer-events:none;"></div>
-          <div style="position:absolute; inset:0; background:linear-gradient(115deg, transparent 35%, rgba(255,255,255,.55) 50%, transparent 65%); background-size:280% 100%; mix-blend-mode:overlay; animation:sheen 1.9s linear infinite; pointer-events:none;"></div>
-          <div style="position:absolute; top:50%; left:50%; width:300px; height:300px; transform:translate(-50%,-50%); background:radial-gradient(circle, rgba(255,255,255,.35), transparent 65%); animation:pulseSoft 1.8s ease-in-out infinite; pointer-events:none;"></div>
-          <sc-for list="{{ cleaningChips }}" as="chip" hint-placeholder-count="0">
-            <div style="{{ chip.style }}">{{ chip.label }}</div>
-          </sc-for>
-          <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:66px; height:66px; pointer-events:none;">
-            <div style="position:absolute; inset:0; border-radius:50%; border:3px solid rgba(255,255,255,.16); border-top-color:var(--teal); animation:spin 1s linear infinite;"></div>
-            <div style="position:absolute; inset:11px; border-radius:50%; border:3px solid var(--border-strong); border-top-color:var(--pink); animation:spinRev 1.4s linear infinite;"></div>
-          </div>
-        </div>
-        <div style="font-family:'Newsreader',Georgia,serif; font-size:16px; color:var(--muted);">Removing location, device &amp; timestamp data…</div>
-      </div>
-    </sc-if>
-
-    <!-- ============ DONE ============ -->
-    <sc-if value="{{ stageDone }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Protected" style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; max-width:560px; animation:riseIn .5s ease both;">
-        <div style="display:inline-flex; align-items:center; gap:9px; padding:8px 16px; border-radius:999px; background:rgba(52,211,153,.12); border:1px solid rgba(52,211,153,.4); color:#34d399; font-family:'Newsreader',Georgia,serif; font-size:12px; letter-spacing:.1em;">
-          <span style="width:18px; height:18px; border-radius:50%; background:#34d399; color:#000000; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">✓</span>
-          PROTECTED
-        </div>
-        <h2 style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:clamp(32px,4.4vw,48px); letter-spacing:-.01em; margin:14px 0 0;">Your photo is <span style="font-style:italic;">clean.</span></h2>
-        <p style="margin:10px 0 0; font-size:15px; line-height:1.55; color:var(--muted);">Every hidden tag has been stripped. This copy is safe to post anywhere — your original file is untouched.</p>
-
-        <div style="position:relative; margin-top:24px; width:100%; max-width:440px; border-radius:18px; overflow:hidden; box-shadow:0 30px 70px rgba(0,0,0,.5); border:1px solid rgba(52,211,153,.3);">
-          {{ doneImg }}
-          <div style="position:absolute; inset:0; box-shadow:inset 0 0 0 1px rgba(52,211,153,.25); pointer-events:none;"></div>
-        </div>
-
-        <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:20px;">
-          <sc-for list="{{ removedChips }}" as="rc" hint-placeholder-count="0">
-            <span style="display:inline-flex; align-items:center; gap:6px; font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.05em; color:var(--muted-2); padding:6px 11px; border-radius:999px; border:1px solid var(--border); background:var(--chip);">
-              <span style="color:#34d399;">✓</span> {{ rc.label }} removed
-            </span>
-          </sc-for>
-        </div>
-
-        <div style="display:flex; gap:12px; margin-top:28px; flex-wrap:wrap; justify-content:center;">
-          <button class="metal-btn inv-btn" onClick="{{ onDownload }}" style="border:none; cursor:pointer; padding:15px 26px; border-radius:13px; background:var(--grad); color:#0a0a12; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:15px; box-shadow:0 14px 34px rgba(139,92,246,.4); transition:transform .2s, box-shadow .2s;" style-hover="transform:translateY(-2px); box-shadow:0 20px 44px rgba(139,92,246,.55);">Download clean photo ↓</button>
-          <button onClick="{{ onReset }}" style="cursor:pointer; padding:15px 24px; border-radius:13px; background:var(--card); border:1px solid var(--border-strong); color:var(--ink); font-family:'Newsreader',Georgia,serif; font-weight:500; font-size:15px; transition:background .2s;" style-hover="background:rgba(255,255,255,.1);">Scan another</button>
-        </div>
-      </div>
-    </sc-if>
-
-  </main>
-
-  <sc-if value="{{ stageIdle }}" hint-placeholder-val="{{ true }}">
-    <div style="width:100%;">
-
-      <!-- FEATURES -->
-      <section id="features" data-screen-label="Features" style="border-top:1px solid var(--border); padding:90px 24px;">
-        <div style="max-width:1080px; margin:0 auto;">
-          <div style="font-family:'Newsreader',Georgia,serif; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold);">Features</div>
-          <h2 style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:clamp(30px,4vw,46px); letter-spacing:-.01em; margin:10px 0 0; max-width:640px;">Everything that leaks, found and removed.</h2>
-          <p style="margin:14px 0 0; max-width:560px; font-size:15px; line-height:1.6; color:var(--muted);">Xyris reads the invisible data layer inside your photos and hands back a clean copy in one tap — without anything ever leaving your device.</p>
-          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(232px,1fr)); gap:16px; margin-top:42px;">
-            <div class="gold-hover" style="border:0.5px solid var(--gold); border-radius:16px; padding:24px; background:var(--card);">
-              <div style="font-family:'Newsreader',Georgia,serif; font-size:13px; color:var(--gold); letter-spacing:.1em;">01</div>
-              <div style="margin-top:12px; font-family:'Instrument Serif',Georgia,serif; font-size:23px; line-height:1.15;">Reads the hidden layer</div>
-              <div style="margin-top:8px; font-size:13.5px; line-height:1.55; color:var(--muted);">Parses real EXIF — GPS coordinates, camera make &amp; model, timestamps and software tags.</div>
-            </div>
-            <div class="gold-hover" style="border:0.5px solid var(--gold); border-radius:16px; padding:24px; background:var(--card);">
-              <div style="font-family:'Newsreader',Georgia,serif; font-size:13px; color:var(--gold); letter-spacing:.1em;">02</div>
-              <div style="margin-top:12px; font-family:'Instrument Serif',Georgia,serif; font-size:23px; line-height:1.15;">One-tap clean</div>
-              <div style="margin-top:8px; font-size:13.5px; line-height:1.55; color:var(--muted);">Re-encodes a fresh copy with every trace of metadata stripped out, ready to share.</div>
-            </div>
-            <div class="gold-hover" style="border:0.5px solid var(--gold); border-radius:16px; padding:24px; background:var(--card);">
-              <div style="font-family:'Newsreader',Georgia,serif; font-size:13px; color:var(--gold); letter-spacing:.1em;">03</div>
-              <div style="margin-top:12px; font-family:'Instrument Serif',Georgia,serif; font-size:23px; line-height:1.15;">Fully on-device</div>
-              <div style="margin-top:8px; font-size:13.5px; line-height:1.55; color:var(--muted);">No uploads, no servers, no account. It works even with your Wi-Fi switched off.</div>
-            </div>
-            <div class="gold-hover" style="border:0.5px solid var(--gold); border-radius:16px; padding:24px; background:var(--card);">
-              <div style="font-family:'Newsreader',Georgia,serif; font-size:13px; color:var(--gold); letter-spacing:.1em;">04</div>
-              <div style="margin-top:12px; font-family:'Instrument Serif',Georgia,serif; font-size:23px; line-height:1.15;">See before you share</div>
-              <div style="margin-top:8px; font-size:13.5px; line-height:1.55; color:var(--muted);">A live scan shows you exactly what each photo reveals about where you've been.</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- PRIVACY -->
-      <section id="privacy" data-screen-label="Privacy" style="border-top:1px solid var(--border); padding:90px 24px;">
-        <div style="max-width:1080px; margin:0 auto; display:flex; gap:54px; flex-wrap:wrap; align-items:flex-start;">
-          <div style="flex:1 1 380px;">
-            <div style="font-family:'Newsreader',Georgia,serif; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold);">Privacy</div>
-            <h2 style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:clamp(30px,4vw,46px); letter-spacing:-.01em; margin:10px 0 0;">Your photos never leave your device. Full stop.</h2>
-            <p style="margin:16px 0 0; font-size:15px; line-height:1.65; color:var(--muted);">Most "privacy" tools quietly send your images to a server. Xyris doesn't. Every byte is read, scanned and cleaned right here in your browser — so the one place your photo is safest is the only place it ever goes.</p>
-          </div>
-          <div style="flex:1 1 300px; display:flex; flex-direction:column; gap:14px;">
-            <div class="gold-hover" style="display:flex; gap:13px; align-items:flex-start; background:var(--card); border:0.5px solid var(--gold); border-radius:14px; padding:18px 20px;">
-              <span style="flex:none; margin-top:2px; width:18px; height:18px; border-radius:50%; background:var(--gold); color:#06060c; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">&check;</span>
-              <div><div style="font-family:'Instrument Serif',Georgia,serif; font-size:19px;">No uploads</div><div style="margin-top:3px; font-size:13.5px; line-height:1.5; color:var(--muted);">Your image bytes never touch a network.</div></div>
-            </div>
-            <div class="gold-hover" style="display:flex; gap:13px; align-items:flex-start; background:var(--card); border:0.5px solid var(--gold); border-radius:14px; padding:18px 20px;">
-              <span style="flex:none; margin-top:2px; width:18px; height:18px; border-radius:50%; background:var(--gold); color:#06060c; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">&check;</span>
-              <div><div style="font-family:'Instrument Serif',Georgia,serif; font-size:19px;">No tracking</div><div style="margin-top:3px; font-size:13.5px; line-height:1.5; color:var(--muted);">No analytics, no cookies, no account.</div></div>
-            </div>
-            <div class="gold-hover" style="display:flex; gap:13px; align-items:flex-start; background:var(--card); border:0.5px solid var(--gold); border-radius:14px; padding:18px 20px;">
-              <span style="flex:none; margin-top:2px; width:18px; height:18px; border-radius:50%; background:var(--gold); color:#06060c; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">&check;</span>
-              <div><div style="font-family:'Instrument Serif',Georgia,serif; font-size:19px;">No lock-in</div><div style="margin-top:3px; font-size:13.5px; line-height:1.5; color:var(--muted);">Your original file is never modified.</div></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- PRICING -->
-      <section id="pricing" data-screen-label="Pricing" style="border-top:1px solid var(--border); padding:90px 24px;">
-        <div style="max-width:1080px; margin:0 auto;">
-          <div style="font-family:'Newsreader',Georgia,serif; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); text-align:center;">Pricing</div>
-          <h2 style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:clamp(30px,4vw,46px); letter-spacing:-.01em; margin:10px 0 0; text-align:center;">Free to clean. Pay only to see deeper.</h2>
-          <p style="max-width:600px; margin:14px auto 0; text-align:center; font-size:15px; line-height:1.6; color:var(--muted);">Metadata removal is always free and runs on your device. The AI visual scan runs on a small credit top-up — pay only when you use it.</p>
-          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; margin-top:40px; align-items:stretch; max-width:760px; margin-left:auto; margin-right:auto;">
-
-            <div style="position:relative; background:var(--card); border:1px solid var(--border); border-radius:20px; padding:30px; display:flex; flex-direction:column;">
-              <div style="font-family:'Newsreader',Georgia,serif; font-size:21px; letter-spacing:.1em; text-align:center; color:#22d3ee;">Aegis</div>
-              <div style="margin-top:10px; display:flex; align-items:baseline; gap:6px;"><span style="font-family:'Instrument Serif',Georgia,serif; font-size:48px; line-height:1;">$0</span><span style="font-size:14px; color:var(--muted);">forever</span></div>
-              <div style="margin-top:22px; display:flex; flex-direction:column; gap:11px; font-size:14px; color:var(--muted);">
-                <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> Unlimited on-device metadata removal</div>
-                <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> GPS, camera, timestamp &amp; software stripping</div>
-                <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> AI exposure report with red highlight boxes</div>
-                <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> Download the metadata-stripped image</div>
-                <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> No card required, No sign in required</div>
-              </div>
-              <a href="#top" onClick="{{ onNavClick }}" style="display:block; text-align:center; text-decoration:none; margin-top:auto; padding-top:26px;"><span class="metal-btn inv-btn" style="display:block; padding:13px; border-radius:12px; background:var(--btn); color:var(--btn-ink); font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:14.5px;">Clean a photo</span></a>
-            </div>
-
-            <div style="position:relative; background:var(--card); border:1px solid var(--gold); border-radius:20px; padding:30px; display:flex; flex-direction:column;">
-              <div style="font-family:'Newsreader',Georgia,serif; font-size:21px; letter-spacing:.1em; text-align:center; color:#d6249f;">Eclipse</div>
-              <div style="margin-top:10px; display:flex; align-items:baseline; gap:6px;"><span style="font-family:'Instrument Serif',Georgia,serif; font-size:48px; line-height:1;">$10</span><span style="font-size:14px; color:var(--muted);">For Maximum shielding and extended usage</span></div>
-              <div style="margin-top:22px; display:flex; flex-direction:column; gap:11px; font-size:14px; color:var(--muted);">
-                <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> Everything in Aegis</div>
-                <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> Download fully redacted images</div>
-                <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> Flagship Claude Opus vision model</div>
-                <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> Saved scan history</div>
-                <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> No subscription — pay only when you scan</div>
-              </div>
-              <div style="margin-top:auto; padding-top:24px;">
-                <div style="padding:2px; border-radius:14px; background:conic-gradient(from var(--irisA) at 50% 50%, transparent 0deg, #2dffcf 13deg, #2dffcf 17deg, transparent 21deg, transparent 60deg, #38b6ff 73deg, #38b6ff 77deg, transparent 81deg, transparent 130deg, #9b6bff 143deg, #9b6bff 147deg, transparent 151deg, transparent 196deg, #ff5fd0 209deg, #ff5fd0 213deg, transparent 217deg, transparent 262deg, #ffb13d 275deg, #ffb13d 279deg, transparent 283deg, transparent 320deg, #4dff9e 332deg, #4dff9e 336deg, transparent 340deg, transparent 360deg), conic-gradient(from var(--chromeA) at 50% 50%, #ffffff 0deg, #c4cbd4 7deg, #474d57 18deg, #14161c 28deg, #b0b7c0 42deg, #ffffff 52deg, #565c66 64deg, #1a1d24 76deg, #cdd3db 90deg, #ffffff 100deg, #3c414b 116deg, #101218 130deg, #9aa1aa 148deg, #ffffff 160deg, #4a505a 174deg, #14161c 186deg, #c4cbd4 202deg, #ffffff 214deg, #50565f 230deg, #16181e 244deg, #b0b7c0 262deg, #ffffff 276deg, #3c414b 292deg, #101218 306deg, #aab1ba 326deg, #ffffff 344deg, #ffffff 360deg); background-size:100% 100%, 100% 100%; background-blend-mode:normal, normal; animation:irisSpin 15s linear infinite, chromeSpin 24s linear infinite; box-shadow:inset 0 1px 1px rgba(255,255,255,.65); transition:filter .25s, box-shadow .25s;" style-hover="filter:brightness(1.08); box-shadow:inset 0 1px 1px rgba(255,255,255,.7);">
-                  <button class="inv-btn" onClick="{{ onAddCredits }}" style="display:block; width:100%; border:none; cursor:pointer; padding:13px; border-radius:12px; background:var(--btn); color:var(--btn-ink); font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:14.5px;">Upgrade — $10.00</button>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          <sc-if value="{{ hasPlanNote }}" hint-placeholder-val="{{ false }}">
-            <div style="max-width:1080px; margin:18px auto 0; text-align:center; font-size:13px; color:{{ planNoteColor }};">{{ planNoteText }}</div>
-          </sc-if>
-
-        </div>
-      </section>
-
-      <!-- FAQ -->
-      <section id="faq" data-screen-label="FAQ" style="border-top:1px solid var(--border); padding:90px 24px 110px;">
-        <div style="max-width:760px; margin:0 auto;">
-          <div style="font-family:'Newsreader',Georgia,serif; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold);">FAQ</div>
-          <h2 style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:clamp(30px,4vw,46px); letter-spacing:-.01em; margin:10px 0 30px;">Questions, answered.</h2>
-          <details style="border-top:1px solid var(--border); padding:18px 0;">
-            <summary style="display:flex; align-items:center; justify-content:space-between; gap:16px; font-family:'Instrument Serif',Georgia,serif; font-size:21px;">Do my photos get uploaded anywhere?<span class="faq-ic" style="flex:none; font-size:22px; color:var(--gold);">+</span></summary>
-            <p style="margin:12px 0 0; font-size:14.5px; line-height:1.6; color:var(--muted);">No. Everything runs locally in your browser — your photos never leave your device, on Aegis or Eclipse.</p>
-          </details>
-          <details style="border-top:1px solid var(--border); padding:18px 0;">
-            <summary style="display:flex; align-items:center; justify-content:space-between; gap:16px; font-family:'Instrument Serif',Georgia,serif; font-size:21px;">What exactly does Xyris remove?<span class="faq-ic" style="flex:none; font-size:22px; color:var(--gold);">+</span></summary>
-            <p style="margin:12px 0 0; font-size:14.5px; line-height:1.6; color:var(--muted);">GPS coordinates, camera make &amp; model, the capture date &amp; time, and software / OS tags embedded in the file. In the Pro Plan, it can also help you find further vulnerabilities in your photo which potential hackers can exploit to breach your information. Xyris Vision prevents this by giving you an option to modify certain parts of the image so that your data stays safe.</p>
-          </details>
-          <details style="border-top:1px solid var(--border); padding:18px 0;">
-            <summary style="display:flex; align-items:center; justify-content:space-between; gap:16px; font-family:'Instrument Serif',Georgia,serif; font-size:21px;">Will cleaning change how my photo looks?<span class="faq-ic" style="flex:none; font-size:22px; color:var(--gold);">+</span></summary>
-            <p style="margin:12px 0 0; font-size:14.5px; line-height:1.6; color:var(--muted);">No. The pixels stay the same — Xyris just re-saves the image without the hidden data attached.</p>
-          </details>
-          <details style="border-top:1px solid var(--border); padding:18px 0;">
-            <summary style="display:flex; align-items:center; justify-content:space-between; gap:16px; font-family:'Instrument Serif',Georgia,serif; font-size:21px;">Which file types are supported?<span class="faq-ic" style="flex:none; font-size:22px; color:var(--gold);">+</span></summary>
-            <p style="margin:12px 0 0; font-size:14.5px; line-height:1.6; color:var(--muted);">Any common image format — JPEG, PNG, WebP, GIF, BMP and more. Your cleaned copy is re-encoded in the same format wherever your browser supports it.</p>
-          </details>
-          <details style="border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:18px 0;">
-            <summary style="display:flex; align-items:center; justify-content:space-between; gap:16px; font-family:'Instrument Serif',Georgia,serif; font-size:21px;">Is my original file modified?<span class="faq-ic" style="flex:none; font-size:22px; color:var(--gold);">+</span></summary>
-            <p style="margin:12px 0 0; font-size:14.5px; line-height:1.6; color:var(--muted);">Never. You download a clean copy; your original stays exactly as it was.</p>
-          </details>
-        </div>
-      </section>
-
-    </div>
-  </sc-if>
-
-  <!-- ===== PLANS / SETTINGS MODAL (migrated) ===== -->
-  <sc-if value="{{ plansOpen }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ onClosePlans }}" style="position:fixed; inset:0; z-index:60; background:rgba(0,0,0,.62); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); display:flex; align-items:flex-start; justify-content:center; padding:40px 18px; overflow:auto;">
-      <div onClick="{{ onStop }}" style="width:100%; max-width:980px; background:var(--surface); border:1px solid var(--border-strong); border-radius:22px; padding:28px; box-shadow:0 40px 100px rgba(0,0,0,.6);">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <button onClick="{{ onShowAccount }}" style="background:none; border:none; cursor:pointer; font-family:'Instrument Serif',Georgia,serif; font-size:24px; color:{{ tabAccountColor }}; padding:0; transition:color .2s;">Account</button>
-          <span style="color:var(--muted-2); font-family:'Instrument Serif',Georgia,serif; font-size:22px;">·</span>
-          <button onClick="{{ onShowBilling }}" style="background:none; border:none; cursor:pointer; font-family:'Instrument Serif',Georgia,serif; font-size:24px; color:{{ tabBillingColor }}; padding:0; transition:color .2s;">Billing</button>
-          <span style="color:var(--muted-2); font-family:'Instrument Serif',Georgia,serif; font-size:22px;">·</span>
-          <button onClick="{{ onOpenHistory }}" style="background:none; border:none; cursor:pointer; font-family:'Instrument Serif',Georgia,serif; font-size:24px; color:{{ tabHistoryColor }}; padding:0; transition:color .2s;">History</button>
-          <div style="margin-left:auto; display:flex; align-items:center; gap:12px;">
-            <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}"><span style="font-size:12.5px; color:var(--muted);">{{ email }}</span></sc-if>
-            <button onClick="{{ onClosePlans }}" aria-label="Close" style="width:34px; height:34px; border-radius:50%; background:var(--card); border:1px solid var(--border); color:var(--ink); cursor:pointer; font-size:15px; line-height:1;">✕</button>
-          </div>
-        </div>
-
-        <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-top:14px; border-radius:12px; padding:12px 16px; font-size:14px; background:var(--card); border:1px solid {{ toastBorder }}; color:var(--ink);">{{ toast }}</div>
-        </sc-if>
-        <sc-if value="{{ hasPlanNote }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-top:14px; font-size:13px; color:{{ planNoteColor }};">{{ planNoteText }}</div>
-        </sc-if>
-
-        <sc-if value="{{ accountView }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-top:18px; display:flex; flex-direction:column; gap:14px;">
-            <div style="display:flex; align-items:center; gap:14px; border-radius:16px; padding:20px; background:var(--card); border:1px solid var(--border);">
-              <div style="width:48px; height:48px; flex:none; border-radius:50%; background:#ffffff; display:flex; align-items:center; justify-content:center; color:#000000; font-family:'Instrument Serif',Georgia,serif; font-size:22px;">{{ accountInitial }}</div>
-              <div style="min-width:0;">
-                <div style="font-family:'Instrument Serif',Georgia,serif; font-size:20px; overflow:hidden; text-overflow:ellipsis;">{{ accountEmail }}</div>
-                <div style="font-size:13px; color:var(--muted);">{{ accountPlan }} plan</div>
-              </div>
-            </div>
-            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px;">
-              <div style="border-radius:14px; padding:18px; background:var(--card); border:1px solid var(--border);">
-                <div style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);">Plan</div>
-                <div style="font-family:'Instrument Serif',Georgia,serif; font-size:24px; margin-top:4px;">{{ accountPlan }}</div>
-              </div>
-              <sc-if value="{{ accountShowCredits }}" hint-placeholder-val="{{ false }}">
-                <div style="border-radius:14px; padding:18px; background:var(--card); border:1px solid var(--border);">
-                  <div style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);">Credits</div>
-                  <div style="font-family:'Instrument Serif',Georgia,serif; font-size:24px; margin-top:4px; color:{{ balanceColor }};">{{ balanceText }}</div>
-                </div>
-              </sc-if>
-            </div>
-            <sc-if value="{{ accountSignedIn }}" hint-placeholder-val="{{ false }}">
-              <button onClick="{{ onSignOut }}" style="cursor:pointer; padding:12px; border-radius:12px; background:var(--card); border:1px solid var(--border-strong); color:var(--ink); font-family:'Newsreader',Georgia,serif; font-size:14px;">Sign out</button>
-            </sc-if>
-            <sc-if value="{{ accountNotSignedIn }}" hint-placeholder-val="{{ true }}">
-              <button class="metal-btn inv-btn" onClick="{{ onOpenAuth }}" style="cursor:pointer; padding:13px; border-radius:12px; background:var(--grad); border:none; color:#0a0a12; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:14.5px;">Sign in / Create account</button>
-            </sc-if>
           </div>
         </sc-if>
 
-        <sc-if value="{{ billingView }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-top:18px; display:flex; flex-direction:column; gap:16px;">
-            <div style="border-radius:16px; padding:22px 24px; background:var(--card); border:1px solid var(--border); display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap; align-items:baseline;">
-              <div>
-                <div style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);">Current tier</div>
-                <div style="font-family:'Instrument Serif',Georgia,serif; font-size:30px; line-height:1.1;">{{ tierLabel }}</div>
+        <!-- ============ PROCESSING (Apple Intelligence style) ============ -->
+        <sc-if value="{{ stageAnalyzing }}" hint-placeholder-val="{{ false }}">
+          <div data-screen-label="Processing"
+            style="display:flex; flex-direction:column; align-items:center; gap:32px; animation:riseIn .5s ease both;">
+            <div style="position:relative; width:min(86vw,440px);">
+              <div
+                style="position:absolute; inset:-24px; border-radius:34px; background:conic-gradient(from var(--aiA), #ff5e9c, #c06bff, #5b8cff, #34e0c7, #ffd23f, #ff7a45, #ff5e9c); filter:blur(28px); opacity:.85; animation:aiSpin 5.5s linear infinite; pointer-events:none;">
               </div>
-              <div style="text-align:right;">
-                <div style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);">Scanning credits</div>
-                <div style="font-family:'Instrument Serif',Georgia,serif; font-size:30px; line-height:1.1; color:{{ balanceColor }};">{{ balanceText }}</div>
+              <div
+                style="position:absolute; inset:-5px; border-radius:24px; background:conic-gradient(from var(--aiA), #ff5e9c, #c06bff, #5b8cff, #34e0c7, #ffd23f, #ff7a45, #ff5e9c); filter:blur(7px); opacity:.75; animation:aiSpin 5.5s linear infinite reverse; pointer-events:none;">
               </div>
-            </div>
-            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px;">
-              <div style="border-radius:16px; padding:22px; background:var(--card); border:1px solid var(--border);">
-                <div style="font-family:'Instrument Serif',Georgia,serif; font-size:20px;">Aegis</div>
-                <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px; font-size:13.5px; color:var(--muted);">
-                  <div>Removes hidden metadata (GPS, device, time)</div>
-                  <div>Runs entirely on your device</div>
-                  <div>AI exposure report + red highlights</div>
-                  <div>Unlimited, always free</div>
+              <div
+                style="position:relative; aspect-ratio:{{ imgAspect }}; box-shadow:0 30px 70px rgba(0,0,0,.5); border-radius:18px; contain:paint; isolation:isolate;">
+                <sc-for list="{{ photoTiles }}" as="tile" hint-placeholder-count="0">
+                  <div style="{{ tile.style }}"></div>
+                </sc-for>
+                <div
+                  style="position:absolute; inset:0; background:linear-gradient(115deg, transparent 32%, rgba(255,255,255,.5) 50%, transparent 68%); background-size:250% 100%; mix-blend-mode:overlay; animation:sheen 2.6s ease-in-out infinite; pointer-events:none;">
                 </div>
-              </div>
-              <div style="border-radius:16px; padding:22px; background:var(--card); border:1px solid var(--border);">
-                <div style="font-family:'Instrument Serif',Georgia,serif; font-size:20px;">Eclipse — $10.00</div>
-                <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px; font-size:13.5px; color:var(--muted);">
-                  <div>Download fully redacted images</div>
-                  <div>Flagship Claude Opus vision model</div>
-                  <div>Saved scan history</div>
-                  <div>Credits last until spent — no expiry</div>
+                <div
+                  style="position:absolute; inset:0; background:radial-gradient(circle at 50% 45%, rgba(255,255,255,.18), transparent 60%); animation:pulseSoft 2.4s ease-in-out infinite; pointer-events:none;">
                 </div>
-                <button class="metal-btn inv-btn" onClick="{{ onAddCredits }}" style="margin-top:16px; width:100%; border:none; cursor:pointer; padding:13px; border-radius:12px; background:var(--grad); color:#0a0a12; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:14.5px;">Add Credits — $10.00</button>
-              </div>
-            </div>
-            <div style="border-radius:16px; padding:20px 22px; background:var(--card); border:1px solid var(--border);">
-              <div style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted-2);">Model pricing reference</div>
-              <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
-                <sc-for list="{{ costHints }}" as="h" hint-placeholder-count="0">
-                  <div style="display:flex; align-items:center; gap:9px; font-size:13.5px;">
-                    <span style="width:7px; height:7px; border-radius:50%; background:{{ h.dot }}; flex:none;"></span>
-                    <span>{{ h.label }}</span>
-                    <span style="margin-left:auto; color:var(--muted);">{{ h.perScan }}</span>
-                  </div>
+                <sc-for list="{{ sparkles }}" as="sp" hint-placeholder-count="0">
+                  <div style="{{ sp.style }}"></div>
                 </sc-for>
               </div>
             </div>
+            <div style="text-align:center;">
+              <div
+                style="font-family:'Instrument Serif',Georgia,serif; font-size:clamp(24px,4vw,32px); background:linear-gradient(110deg,#ff5e9c,#c06bff,#5b8cff,#34e0c7,#ffd23f,#ff5e9c); background-size:300% auto; -webkit-background-clip:text; background-clip:text; color:transparent; animation:textShimmer 4s linear infinite;">
+                Reading your photo…</div>
+              <div style="margin-top:10px; font-size:14px; color:var(--muted);">Looking for hidden location, device
+                &amp; identity data</div>
+            </div>
           </div>
         </sc-if>
 
-        <sc-if value="{{ historyView }}" hint-placeholder-val="{{ false }}">
-          <p style="margin:14px 0 14px; font-size:13.5px; color:var(--muted);">Saved scans from your AI vulnerability checks. We log the model, risk and time — never the image.</p>
-          <sc-if value="{{ hasHistory }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex; flex-direction:column; gap:8px;">
-              <sc-for list="{{ histRows }}" as="r" hint-placeholder-count="0">
-                <div style="display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px; background:var(--card); border:1px solid var(--border); font-size:13px; flex-wrap:wrap;">
-                  <span style="color:var(--muted-2); min-width:150px;">{{ r.when }}</span>
-                  <span style="font-family:'Newsreader',Georgia,serif;">{{ r.model }}</span>
-                  <span style="margin-left:auto; color:var(--muted);">risk: {{ r.risk }}</span>
-                  <span style="color:var(--muted-2);">{{ r.findings }} found</span>
+        <!-- ============ ANALYSIS (scanning + results) ============ -->
+        <sc-if value="{{ stageResults }}" hint-placeholder-val="{{ false }}">
+          <div data-screen-label="Analysis"
+            style="width:100%; max-width:1060px; margin:0 auto; animation:riseIn .5s ease both;">
+            <button onClick="{{ onReset }}"
+              style="background:none; border:none; cursor:pointer; font-size:13px; color:var(--muted); padding:6px 0; font-family:'Newsreader',Georgia,serif; transition:color .2s;"
+              style-hover="color:var(--ink);">← Scan a different photo</button>
+
+            <div style="display:flex; gap:30px; align-items:flex-start; margin-top:14px; flex-wrap:wrap;">
+              <!-- photo -->
+              <div style="flex:1 1 420px; min-width:320px; display:flex; justify-content:center;">
+                <div
+                  style="position:relative; width:100%; max-width:640px; border-radius:18px; overflow:hidden; box-shadow:0 34px 80px rgba(0,0,0,.55); border:1px solid var(--border);">
+                  {{ analysisImg }}
+                  <div
+                    style="position:absolute; inset:0; background:linear-gradient(transparent 60%, rgba(8,8,16,.3)); pointer-events:none;">
+                  </div>
+                  <div
+                    style="position:absolute; inset:0; background-image:linear-gradient(rgba(124,200,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(124,200,255,.05) 1px,transparent 1px); background-size:42px 42px; mix-blend-mode:screen; pointer-events:none;">
+                  </div>
+                  <sc-for list="{{ faceBoxes }}" as="fb" hint-placeholder-count="0">
+                    <div style="{{ fb.style }}"></div>
+                  </sc-for>
+                  <sc-for list="{{ pins }}" as="pin" hint-placeholder-count="0">
+                    <div style="{{ pin.style }}">
+                      <span style="{{ pin.dotStyle }}"></span>
+                      <span style="{{ pin.tagStyle }}">{{ pin.tag }}</span>
+                      <span style="{{ pin.valStyle }}">{{ pin.value }}</span>
+                    </div>
+                  </sc-for>
                 </div>
+              </div>
+
+              <!-- panel -->
+              <div style="flex:0 0 360px; max-width:360px; display:flex; flex-direction:column; gap:13px;">
+                <div
+                  style="display:flex; align-items:center; gap:8px; line-height:1; font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.16em; color:var(--teal);">
+                  <span
+                    style="width:6px; height:6px; border-radius:50%; background:var(--teal); box-shadow:0 0 8px var(--teal);"></span>
+                  {{ panelKicker }}
+                </div>
+                <h2
+                  style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:28px; line-height:1.08; letter-spacing:0; margin:0;">
+                  <span style="text-decoration:underline; text-underline-offset:3px;">{{ panelCount }}</span>{{
+                  panelTitleRest }}</h2>
+                <p style="margin:0; font-size:13.5px; line-height:1.5; color:var(--muted);">{{ panelSub }}</p>
+
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
+                  <sc-for list="{{ leakCards }}" as="card" hint-placeholder-count="0">
+                    <div style="{{ card.style }}">
+                      <div style="{{ card.barStyle }}"></div>
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="{{ card.dotStyle }}"></span>
+                        <span style="{{ card.tagStyle }}">{{ card.tag }}</span>
+                        <span style="{{ card.sevStyle }}">{{ card.sevLabel }}</span>
+                      </div>
+                      <div
+                        style="margin-top:8px; font-family:'Newsreader',Georgia,serif; font-weight:500; font-size:14.5px;">
+                        {{ card.title }}</div>
+                      <div
+                        style="margin-top:3px; font-family:'Newsreader',Georgia,serif; font-size:12px; color:var(--ink); word-break:break-word;">
+                        {{ card.value }}</div>
+                      <div style="{{ card.placeWrapStyle }}"><span style="{{ card.placeDotStyle }}"></span><span
+                          style="{{ card.placeTextStyle }}">{{ card.place }}</span></div>
+                      <div style="margin-top:5px; font-size:12px; line-height:1.45; color:var(--muted-2);">{{
+                        card.detail }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <sc-if value="{{ showCTA }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:6px;">
+                    <button class="metal-btn inv-btn" onClick="{{ onClean }}"
+                      style="width:100%; border:none; cursor:pointer; padding:15px; border-radius:13px; background:var(--btn); color:var(--btn-ink); font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:15px;">{{
+                      ctaLabel }}</button>
+                    <div
+                      style="margin-top:9px; font-size:11.5px; line-height:1.4; color:var(--muted-2); text-align:center;">
+                      {{ ctaNote }}</div>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+
+            <!-- ===== AI VISUAL SCAN (migrated feature) ===== -->
+            <div style="margin-top:30px; border-top:1px solid var(--border); padding-top:26px;">
+              <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <span
+                  style="width:6px; height:6px; border-radius:50%; background:#fb7185; box-shadow:0 0 8px #fb7185;"></span>
+                <span
+                  style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.16em; color:#fb7185;">VISIBLE-IMAGE
+                  SCAN · AI</span>
+                <sc-if value="{{ vIsDemo }}" hint-placeholder-val="{{ false }}">
+                  <span
+                    style="font-family:'Newsreader',Georgia,serif; font-size:9px; letter-spacing:.1em; color:var(--muted-2); border:1px solid var(--border); border-radius:999px; padding:2px 8px;">DEMO</span>
+                </sc-if>
+              </div>
+
+              <sc-if value="{{ vCollapsed }}" hint-placeholder-val="{{ true }}">
+                <div
+                  style="margin-top:16px; display:flex; gap:20px; align-items:center; flex-wrap:wrap; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px 24px;">
+                  <div style="flex:1 1 320px;">
+                    <div style="font-family:'Instrument Serif',Georgia,serif; font-size:24px; line-height:1.1;">
+                      Metadata's gone. Now check the picture itself.</div>
+                    <div style="margin-top:7px; font-size:13.5px; line-height:1.55; color:var(--muted);">An AI model
+                      looks for street signs, license plates, house numbers, reflections and landmarks that give away
+                      where you are — then lets you black it out completely and download a redacted copy.</div>
+                    <sc-if value="{{ showDemoNote }}" hint-placeholder-val="{{ false }}">
+                      <div style="margin-top:10px; font-size:12px; color:var(--muted-2);">This is a demo scan. <button
+                          onClick="{{ onGoPlans }}"
+                          style="background:none; border:none; padding:0; color:var(--gold); cursor:pointer; font-family:'Newsreader',Georgia,serif; font-size:12px; text-decoration:underline;">Upgrade</button>
+                        to scan for real.</div>
+                    </sc-if>
+                  </div>
+                  <button class="metal-btn inv-btn" onClick="{{ onRunVisual }}"
+                    style="flex:none; border:none; cursor:pointer; padding:14px 24px; border-radius:13px; background:var(--btn); color:var(--btn-ink); font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:15px; transition:transform .2s, opacity .2s;"
+                    style-hover="opacity:.9;">Run AI visual scan</button>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ vScanning }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:18px; text-align:center; padding:34px 0;">
+                  <div
+                    style="font-family:'Instrument Serif',Georgia,serif; font-size:clamp(22px,4vw,30px); background:linear-gradient(110deg,#ff5e9c,#c06bff,#5b8cff,#34e0c7,#ffd23f,#ff5e9c); background-size:300% auto; -webkit-background-clip:text; background-clip:text; color:transparent; animation:textShimmer 4s linear infinite;">
+                    Scanning for what leaks…</div>
+                  <div style="margin-top:8px; font-size:13.5px; color:var(--muted);">Analysing the image for visible
+                    privacy risks</div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ vErrorState }}" hint-placeholder-val="{{ false }}">
+                <div
+                  style="margin-top:16px; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; font-size:13.5px; color:#fb7185;">
+                  {{ vError }}
+                  <button onClick="{{ onRunVisual }}"
+                    style="margin-left:8px; background:none; border:none; color:var(--ink); cursor:pointer; font-family:'Newsreader',Georgia,serif; text-decoration:underline;">Try
+                    again</button>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ vResults }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:18px; display:flex; gap:30px; align-items:flex-start; flex-wrap:wrap;">
+                  <div style="flex:1 1 420px; min-width:320px;">
+                    <div
+                      style="position:relative; width:100%; border-radius:18px; overflow:hidden; border:1px solid var(--border); box-shadow:0 34px 80px rgba(0,0,0,.45);">
+                      <canvas id="ai-canvas" style="display:block; width:100%; height:auto;"></canvas>
+                      <sc-for list="{{ vBoxes }}" as="b" hint-placeholder-count="0">
+                        <div data-index="{{ b.index }}" onClick="{{ redactFinding }}" style="{{ b.boxStyle }}"><span
+                            style="{{ b.tagStyle }}">{{ b.label }}</span></div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="flex:0 0 360px; max-width:360px; display:flex; flex-direction:column; gap:13px;">
+                    <div
+                      style="display:flex; align-items:center; gap:8px; font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.16em; color:var(--teal);">
+                      <span
+                        style="width:6px; height:6px; border-radius:50%; background:{{ vRiskDot }}; box-shadow:0 0 8px {{ vRiskDot }};"></span>
+                      EXPOSURE REPORT
+                    </div>
+                    <h3
+                      style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:26px; line-height:1.08; margin:2px 0 0;">
+                      {{ vTitle }}</h3>
+                    <sc-if value="{{ hasVSummary }}" hint-placeholder-val="{{ false }}">
+                      <p style="margin:0; font-size:13.5px; line-height:1.5; color:var(--muted);">{{ vSummary }}</p>
+                    </sc-if>
+                    <sc-if value="{{ vHasFindings }}" hint-placeholder-val="{{ false }}">
+                      <div
+                        style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.1em; color:var(--muted-2); text-transform:uppercase; margin-top:2px;">
+                        Visible vulnerabilities — click a box to black out</div>
+                      <div style="display:flex; flex-direction:column; gap:10px;">
+                        <sc-for list="{{ vCards }}" as="c" hint-placeholder-count="0">
+                          <div
+                            style="border-radius:14px; padding:12px 14px; position:relative; background:var(--card); border:1px solid var(--border);">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                              <span
+                                style="font-family:'Newsreader',Georgia,serif; font-size:10px; letter-spacing:.1em; color:{{ c.sevColor }};">{{
+                                c.type }}</span>
+                              <span
+                                style="margin-left:auto; font-family:'Newsreader',Georgia,serif; font-size:9px; color:{{ c.sevColor }}; border:1px solid {{ c.sevColor }}55; padding:2px 7px; border-radius:6px;">{{
+                                c.sevLabel }}</span>
+                            </div>
+                            <div style="margin-top:6px; font-size:13px; line-height:1.45; color:var(--muted);">{{ c.desc
+                              }}</div>
+                            <button data-index="{{ c.index }}" onClick="{{ redactFinding }}" style="{{ c.btnStyle }}">{{
+                              c.btnLabel }}</button>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <div style="margin-top:6px; display:flex; flex-direction:column; gap:10px;">
+                      <button class="metal-btn inv-btn" onClick="{{ onDownloadStripped }}"
+                        style="width:100%; border:none; cursor:pointer; padding:14px; border-radius:13px; background:var(--btn); color:var(--btn-ink); font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:15px;">Download
+                        (metadata stripped) ↓</button>
+                      <sc-if value="{{ canDownloadRedacted }}" hint-placeholder-val="{{ false }}">
+                        <button class="metal-btn inv-btn" onClick="{{ onDownloadRedacted }}"
+                          style="width:100%; border:none; cursor:pointer; padding:14px; border-radius:13px; background:var(--grad); color:#0a0a12; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:15px; box-shadow:0 14px 34px rgba(139,92,246,.35); transition:transform .2s;"
+                          style-hover="transform:translateY(-2px);">Download clean image (redacted) ↓</button>
+                      </sc-if>
+                      <sc-if value="{{ vLockedDownload }}" hint-placeholder-val="{{ true }}">
+                        <div
+                          style="border-radius:12px; padding:14px; text-align:center; background:var(--card); border:1px solid var(--border);">
+                          <div style="font-family:'Newsreader',Georgia,serif; font-size:13px; font-weight:600;">Redacted
+                            download is a paid feature</div>
+                          <div style="margin-top:4px; font-size:11.5px; color:var(--muted-2); line-height:1.4;">
+                            Redactions show on screen but aren't saved into the free download. Upgrade to export a fully
+                            redacted image.</div>
+                          <button onClick="{{ onGoPlans }}"
+                            style="margin-top:10px; background:none; border:none; color:var(--gold); cursor:pointer; font-family:'Newsreader',Georgia,serif; font-size:13px;">See
+                            plans →</button>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ============ CLEANING ============ -->
+        <sc-if value="{{ stageCleaning }}" hint-placeholder-val="{{ false }}">
+          <div data-screen-label="Cleaning"
+            style="display:flex; flex-direction:column; align-items:center; gap:26px; animation:riseIn .4s ease both;">
+            <div
+              style="display:flex; align-items:center; gap:8px; font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.18em; color:var(--pink);">
+              <span
+                style="width:6px; height:6px; border-radius:50%; background:var(--pink); box-shadow:0 0 8px var(--pink); animation:dotPulse 1s ease-in-out infinite;"></span>
+              SCRUBBING METADATA
+            </div>
+            <div
+              style="position:relative; width:100%; max-width:520px; border-radius:18px; overflow:hidden; box-shadow:0 34px 80px rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.1);">
+              {{ cleaningImg }}
+              <div
+                style="position:absolute; inset:0; background:var(--grad); mix-blend-mode:color; opacity:.25; animation:pulseSoft 2.4s ease-in-out infinite; pointer-events:none;">
+              </div>
+              <div
+                style="position:absolute; inset:0; background:linear-gradient(115deg, transparent 35%, rgba(255,255,255,.55) 50%, transparent 65%); background-size:280% 100%; mix-blend-mode:overlay; animation:sheen 1.9s linear infinite; pointer-events:none;">
+              </div>
+              <div
+                style="position:absolute; top:50%; left:50%; width:300px; height:300px; transform:translate(-50%,-50%); background:radial-gradient(circle, rgba(255,255,255,.35), transparent 65%); animation:pulseSoft 1.8s ease-in-out infinite; pointer-events:none;">
+              </div>
+              <sc-for list="{{ cleaningChips }}" as="chip" hint-placeholder-count="0">
+                <div style="{{ chip.style }}">{{ chip.label }}</div>
+              </sc-for>
+              <div
+                style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:66px; height:66px; pointer-events:none;">
+                <div
+                  style="position:absolute; inset:0; border-radius:50%; border:3px solid rgba(255,255,255,.16); border-top-color:var(--teal); animation:spin 1s linear infinite;">
+                </div>
+                <div
+                  style="position:absolute; inset:11px; border-radius:50%; border:3px solid var(--border-strong); border-top-color:var(--pink); animation:spinRev 1.4s linear infinite;">
+                </div>
+              </div>
+            </div>
+            <div style="font-family:'Newsreader',Georgia,serif; font-size:16px; color:var(--muted);">Removing location,
+              device &amp; timestamp data…</div>
+          </div>
+        </sc-if>
+
+        <!-- ============ DONE ============ -->
+        <sc-if value="{{ stageDone }}" hint-placeholder-val="{{ false }}">
+          <div data-screen-label="Protected"
+            style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; max-width:560px; animation:riseIn .5s ease both;">
+            <div
+              style="display:inline-flex; align-items:center; gap:9px; padding:8px 16px; border-radius:999px; background:rgba(52,211,153,.12); border:1px solid rgba(52,211,153,.4); color:#34d399; font-family:'Newsreader',Georgia,serif; font-size:12px; letter-spacing:.1em;">
+              <span
+                style="width:18px; height:18px; border-radius:50%; background:#34d399; color:#000000; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">✓</span>
+              PROTECTED
+            </div>
+            <h2
+              style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:clamp(32px,4.4vw,48px); letter-spacing:-.01em; margin:14px 0 0;">
+              Your photo is <span style="font-style:italic;">clean.</span></h2>
+            <p style="margin:10px 0 0; font-size:15px; line-height:1.55; color:var(--muted);">Every hidden tag has been
+              stripped. This copy is safe to post anywhere — your original file is untouched.</p>
+
+            <div
+              style="position:relative; margin-top:24px; width:100%; max-width:440px; border-radius:18px; overflow:hidden; box-shadow:0 30px 70px rgba(0,0,0,.5); border:1px solid rgba(52,211,153,.3);">
+              {{ doneImg }}
+              <div
+                style="position:absolute; inset:0; box-shadow:inset 0 0 0 1px rgba(52,211,153,.25); pointer-events:none;">
+              </div>
+            </div>
+
+            <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:20px;">
+              <sc-for list="{{ removedChips }}" as="rc" hint-placeholder-count="0">
+                <span
+                  style="display:inline-flex; align-items:center; gap:6px; font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.05em; color:var(--muted-2); padding:6px 11px; border-radius:999px; border:1px solid var(--border); background:var(--chip);">
+                  <span style="color:#34d399;">✓</span> {{ rc.label }} removed
+                </span>
               </sc-for>
             </div>
-          </sc-if>
-          <sc-if value="{{ noHistory }}" hint-placeholder-val="{{ true }}">
-            <div style="border-radius:14px; padding:28px; text-align:center; background:var(--card); border:1px solid var(--border); color:var(--muted); font-size:14px;">No scans yet. Run an AI visual scan to start building history.</div>
-          </sc-if>
-        </sc-if>
-      </div>
-    </div>
-  </sc-if>
 
-  <!-- ===== BATCH CLEAN + ZIP MODAL ===== -->
-  <sc-if value="{{ batchOpen }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ onCloseBatch }}" style="position:fixed; inset:0; z-index:66; background:rgba(0,0,0,.62); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); display:flex; align-items:flex-start; justify-content:center; padding:40px 18px; overflow:auto;">
-      <div onClick="{{ onStop }}" style="width:100%; max-width:880px; background:var(--surface); border:1px solid var(--border-strong); border-radius:22px; padding:28px; box-shadow:0 40px 100px rgba(0,0,0,.6);">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <div style="font-family:'Instrument Serif',Georgia,serif; font-size:24px;">Batch clean</div>
-          <span style="font-size:13px; color:var(--muted);">{{ batchCountLabel }}</span>
-          <button onClick="{{ onCloseBatch }}" aria-label="Close" style="margin-left:auto; width:34px; height:34px; border-radius:50%; background:var(--card); border:1px solid var(--border); color:var(--ink); cursor:pointer; font-size:15px;">✕</button>
-        </div>
-        <p style="margin:8px 0 0; font-size:13.5px; color:var(--muted);">Metadata is stripped from every photo on your device. Download them all as a single zip.</p>
-        <sc-if value="{{ hasBatch }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-top:18px; display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px;">
-            <sc-for list="{{ batchCards }}" as="b" hint-placeholder-count="0">
-              <div style="position:relative; border-radius:12px; overflow:hidden; border:1px solid var(--border); background:var(--card);">
-                <div style="{{ b.thumbStyle }}"></div>
-                <button data-index="{{ b.index }}" onClick="{{ onRemoveBatch }}" aria-label="Remove" style="position:absolute; top:6px; right:6px; width:22px; height:22px; border-radius:50%; background:rgba(8,8,16,.72); border:none; color:#fff; cursor:pointer; font-size:11px; line-height:1;">✕</button>
-                <div style="padding:7px 9px; font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ b.name }}</div>
-              </div>
-            </sc-for>
+            <div style="display:flex; gap:12px; margin-top:28px; flex-wrap:wrap; justify-content:center;">
+              <button class="metal-btn inv-btn" onClick="{{ onDownload }}"
+                style="border:none; cursor:pointer; padding:15px 26px; border-radius:13px; background:var(--grad); color:#0a0a12; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:15px; box-shadow:0 14px 34px rgba(139,92,246,.4); transition:transform .2s, box-shadow .2s;"
+                style-hover="transform:translateY(-2px); box-shadow:0 20px 44px rgba(139,92,246,.55);">Download clean
+                photo ↓</button>
+              <button onClick="{{ onReset }}"
+                style="cursor:pointer; padding:15px 24px; border-radius:13px; background:var(--card); border:1px solid var(--border-strong); color:var(--ink); font-family:'Newsreader',Georgia,serif; font-weight:500; font-size:15px; transition:background .2s;"
+                style-hover="background:rgba(255,255,255,.1);">Scan another</button>
+            </div>
           </div>
         </sc-if>
-        <sc-if value="{{ batchBusy }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-top:16px; font-size:13.5px; color:var(--muted);">Processing…</div>
-        </sc-if>
-        <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
-          <button class="metal-btn inv-btn" onClick="{{ onDownloadZip }}" style="border:none; cursor:pointer; padding:13px 22px; border-radius:12px; background:var(--grad); color:#0a0a12; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:14.5px;">Download all (.zip) ↓</button>
-          <button onClick="{{ onAddMoreBatch }}" style="cursor:pointer; padding:13px 20px; border-radius:12px; background:var(--card); border:1px solid var(--border-strong); color:var(--ink); font-family:'Newsreader',Georgia,serif; font-size:14.5px;">Add more</button>
-        </div>
-      </div>
-    </div>
-  </sc-if>
 
-  <!-- ===== AUTH / SIGN-IN MODAL ===== -->
-  <sc-if value="{{ authOpen }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ onCloseAuth }}" style="position:fixed; inset:0; z-index:75; background:rgba(0,0,0,.62); -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px); display:flex; align-items:center; justify-content:center; padding:24px;">
-      <div onClick="{{ onStop }}" style="max-width:400px; width:100%; background:var(--surface); border:1px solid var(--border-strong); border-radius:18px; padding:30px; text-align:center; box-shadow:0 40px 100px rgba(0,0,0,.6);">
-        <h3 style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:25px; margin:0;">Create your Xyris account</h3>
-        <p style="margin:10px 0 0; font-size:14px; line-height:1.5; color:var(--muted);">Needed to run the AI scan and manage your Eclipse plan. Your photos are never uploaded.</p>
-        <div style="margin-top:22px; display:flex; flex-direction:column; gap:10px;">
-          <button onClick="{{ onSignInGoogle }}" style="display:flex; align-items:center; justify-content:center; gap:11px; cursor:pointer; padding:13px; border-radius:12px; background:var(--btn); color:var(--btn-ink); border:none; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:14.5px;"><span style="width:20px; height:20px; border-radius:50%; background:#fff; border:1px solid rgba(0,0,0,.15); color:#4285F4; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">G</span> Continue with Google</button>
-        </div>
-        <button onClick="{{ onCloseAuth }}" style="margin-top:14px; cursor:pointer; background:none; border:none; color:var(--muted); font-family:'Newsreader',Georgia,serif; font-size:13px;">Maybe later</button>
-      </div>
-    </div>
-  </sc-if>
+      </main>
 
-  <!-- ===== CREDITS-EXHAUSTED MODAL (migrated) ===== -->
-  <sc-if value="{{ creditsOpen }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ onCloseCredits }}" style="position:fixed; inset:0; z-index:70; background:rgba(0,0,0,.6); -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px); display:flex; align-items:center; justify-content:center; padding:24px;">
-      <div onClick="{{ onStop }}" style="max-width:440px; width:100%; background:var(--surface); border:1px solid var(--border-strong); border-radius:18px; padding:30px; text-align:center; box-shadow:0 40px 100px rgba(0,0,0,.6);">
-        <div style="width:46px; height:46px; margin:0 auto; border-radius:50%; background:rgba(251,191,36,.14); border:1px solid rgba(251,191,36,.4); display:flex; align-items:center; justify-content:center; color:#fbbf24; font-family:'Instrument Serif',Georgia,serif; font-size:24px;">!</div>
-        <h3 style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:25px; margin:14px 0 0;">This scan needs credits.</h3>
-        <p style="margin:12px 0 0; font-size:14px; line-height:1.55; color:var(--muted);">Your Aegis plan still removes hidden metadata on-device. To run the AI visual scan on a paid model, top up credits.</p>
-        <div style="margin-top:22px; display:flex; flex-direction:column; gap:10px;">
-          <button class="metal-btn inv-btn" onClick="{{ onAddCredits }}" style="border:none; cursor:pointer; padding:14px; border-radius:12px; background:var(--grad); color:#0a0a12; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:15px;">Add Credits — $10.00</button>
-          <button onClick="{{ onCloseCredits }}" style="cursor:pointer; padding:10px; border-radius:12px; background:none; border:none; color:var(--muted); font-family:'Newsreader',Georgia,serif; font-size:13.5px;">Continue with Aegis plan</button>
+      <sc-if value="{{ stageIdle }}" hint-placeholder-val="{{ true }}">
+        <div style="width:100%;">
+
+          <!-- FEATURES -->
+          <section id="features" data-screen-label="Features"
+            style="border-top:1px solid var(--border); padding:90px 24px;">
+            <div style="max-width:1080px; margin:0 auto;">
+              <div
+                style="font-family:'Newsreader',Georgia,serif; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold);">
+                Features</div>
+              <h2
+                style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:clamp(30px,4vw,46px); letter-spacing:-.01em; margin:10px 0 0; max-width:640px;">
+                Everything that leaks, found and removed.</h2>
+              <p style="margin:14px 0 0; max-width:560px; font-size:15px; line-height:1.6; color:var(--muted);">Xyris
+                reads the invisible data layer inside your photos and hands back a clean copy in one tap — without
+                anything ever leaving your device.</p>
+              <div
+                style="display:grid; grid-template-columns:repeat(auto-fit,minmax(232px,1fr)); gap:16px; margin-top:42px;">
+                <div class="gold-hover"
+                  style="border:0.5px solid var(--gold); border-radius:16px; padding:24px; background:var(--card);">
+                  <div
+                    style="font-family:'Newsreader',Georgia,serif; font-size:13px; color:var(--gold); letter-spacing:.1em;">
+                    01</div>
+                  <div
+                    style="margin-top:12px; font-family:'Instrument Serif',Georgia,serif; font-size:23px; line-height:1.15;">
+                    Reads the hidden layer</div>
+                  <div style="margin-top:8px; font-size:13.5px; line-height:1.55; color:var(--muted);">Parses real EXIF
+                    — GPS coordinates, camera make &amp; model, timestamps and software tags.</div>
+                </div>
+                <div class="gold-hover"
+                  style="border:0.5px solid var(--gold); border-radius:16px; padding:24px; background:var(--card);">
+                  <div
+                    style="font-family:'Newsreader',Georgia,serif; font-size:13px; color:var(--gold); letter-spacing:.1em;">
+                    02</div>
+                  <div
+                    style="margin-top:12px; font-family:'Instrument Serif',Georgia,serif; font-size:23px; line-height:1.15;">
+                    One-tap clean</div>
+                  <div style="margin-top:8px; font-size:13.5px; line-height:1.55; color:var(--muted);">Re-encodes a
+                    fresh copy with every trace of metadata stripped out, ready to share.</div>
+                </div>
+                <div class="gold-hover"
+                  style="border:0.5px solid var(--gold); border-radius:16px; padding:24px; background:var(--card);">
+                  <div
+                    style="font-family:'Newsreader',Georgia,serif; font-size:13px; color:var(--gold); letter-spacing:.1em;">
+                    03</div>
+                  <div
+                    style="margin-top:12px; font-family:'Instrument Serif',Georgia,serif; font-size:23px; line-height:1.15;">
+                    Fully on-device</div>
+                  <div style="margin-top:8px; font-size:13.5px; line-height:1.55; color:var(--muted);">No uploads, no
+                    servers, no account. It works even with your Wi-Fi switched off.</div>
+                </div>
+                <div class="gold-hover"
+                  style="border:0.5px solid var(--gold); border-radius:16px; padding:24px; background:var(--card);">
+                  <div
+                    style="font-family:'Newsreader',Georgia,serif; font-size:13px; color:var(--gold); letter-spacing:.1em;">
+                    04</div>
+                  <div
+                    style="margin-top:12px; font-family:'Instrument Serif',Georgia,serif; font-size:23px; line-height:1.15;">
+                    See before you share</div>
+                  <div style="margin-top:8px; font-size:13.5px; line-height:1.55; color:var(--muted);">A live scan shows
+                    you exactly what each photo reveals about where you've been.</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PRIVACY -->
+          <section id="privacy" data-screen-label="Privacy"
+            style="border-top:1px solid var(--border); padding:90px 24px;">
+            <div
+              style="max-width:1080px; margin:0 auto; display:flex; gap:54px; flex-wrap:wrap; align-items:flex-start;">
+              <div style="flex:1 1 380px;">
+                <div
+                  style="font-family:'Newsreader',Georgia,serif; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold);">
+                  Privacy</div>
+                <h2
+                  style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:clamp(30px,4vw,46px); letter-spacing:-.01em; margin:10px 0 0;">
+                  Your photos never leave your device. Full stop.</h2>
+                <p style="margin:16px 0 0; font-size:15px; line-height:1.65; color:var(--muted);">Most "privacy" tools
+                  quietly send your images to a server. Xyris doesn't. Every byte is read, scanned and cleaned right
+                  here in your browser — so the one place your photo is safest is the only place it ever goes.</p>
+              </div>
+              <div style="flex:1 1 300px; display:flex; flex-direction:column; gap:14px;">
+                <div class="gold-hover"
+                  style="display:flex; gap:13px; align-items:flex-start; background:var(--card); border:0.5px solid var(--gold); border-radius:14px; padding:18px 20px;">
+                  <span
+                    style="flex:none; margin-top:2px; width:18px; height:18px; border-radius:50%; background:var(--gold); color:#06060c; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">&check;</span>
+                  <div>
+                    <div style="font-family:'Instrument Serif',Georgia,serif; font-size:19px;">No uploads</div>
+                    <div style="margin-top:3px; font-size:13.5px; line-height:1.5; color:var(--muted);">Your image bytes
+                      never touch a network.</div>
+                  </div>
+                </div>
+                <div class="gold-hover"
+                  style="display:flex; gap:13px; align-items:flex-start; background:var(--card); border:0.5px solid var(--gold); border-radius:14px; padding:18px 20px;">
+                  <span
+                    style="flex:none; margin-top:2px; width:18px; height:18px; border-radius:50%; background:var(--gold); color:#06060c; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">&check;</span>
+                  <div>
+                    <div style="font-family:'Instrument Serif',Georgia,serif; font-size:19px;">No tracking</div>
+                    <div style="margin-top:3px; font-size:13.5px; line-height:1.5; color:var(--muted);">No analytics, no
+                      cookies, no account.</div>
+                  </div>
+                </div>
+                <div class="gold-hover"
+                  style="display:flex; gap:13px; align-items:flex-start; background:var(--card); border:0.5px solid var(--gold); border-radius:14px; padding:18px 20px;">
+                  <span
+                    style="flex:none; margin-top:2px; width:18px; height:18px; border-radius:50%; background:var(--gold); color:#06060c; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">&check;</span>
+                  <div>
+                    <div style="font-family:'Instrument Serif',Georgia,serif; font-size:19px;">No lock-in</div>
+                    <div style="margin-top:3px; font-size:13.5px; line-height:1.5; color:var(--muted);">Your original
+                      file is never modified.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PRICING -->
+          <section id="pricing" data-screen-label="Pricing"
+            style="border-top:1px solid var(--border); padding:90px 24px;">
+            <div style="max-width:1080px; margin:0 auto;">
+              <div
+                style="font-family:'Newsreader',Georgia,serif; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); text-align:center;">
+                Pricing</div>
+              <h2
+                style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:clamp(30px,4vw,46px); letter-spacing:-.01em; margin:10px 0 0; text-align:center;">
+                Free to clean. Pay only to see deeper.</h2>
+              <p
+                style="max-width:600px; margin:14px auto 0; text-align:center; font-size:15px; line-height:1.6; color:var(--muted);">
+                Metadata removal is always free and runs on your device. The AI visual scan runs on a small credit
+                top-up — pay only when you use it.</p>
+              <div
+                style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; margin-top:40px; align-items:stretch; max-width:760px; margin-left:auto; margin-right:auto;">
+
+                <div
+                  style="position:relative; background:var(--card); border:1px solid var(--border); border-radius:20px; padding:30px; display:flex; flex-direction:column;">
+                  <div
+                    style="font-family:'Newsreader',Georgia,serif; font-size:21px; letter-spacing:.1em; text-align:center; background:linear-gradient(90deg,#3b82f6,#22d3ee); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;">
+                    Aegis</div>
+                  <div style="margin-top:10px; display:flex; align-items:baseline; gap:6px;"><span
+                      style="font-family:'Instrument Serif',Georgia,serif; font-size:48px; line-height:1;">$0</span><span
+                      style="font-size:14px; color:var(--muted);">forever</span></div>
+                  <div
+                    style="margin-top:22px; display:flex; flex-direction:column; gap:11px; font-size:14px; color:var(--muted);">
+                    <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> Unlimited
+                      on-device metadata removal</div>
+                    <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> GPS, camera,
+                      timestamp &amp; software stripping</div>
+                    <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> AI exposure
+                      report with red highlight boxes</div>
+                    <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> Download the
+                      metadata-stripped image</div>
+                    <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> No card
+                      required, No sign in required</div>
+                  </div>
+                  <a href="#top" onClick="{{ onNavClick }}"
+                    style="display:block; text-align:center; text-decoration:none; margin-top:auto; padding-top:26px;"><span
+                      class="metal-btn inv-btn"
+                      style="display:block; padding:13px; border-radius:12px; background:var(--btn); color:var(--btn-ink); font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:14.5px;">Clean
+                      a photo</span></a>
+                </div>
+
+                <div
+                  style="position:relative; background:var(--card); border:1px solid var(--gold); border-radius:20px; padding:30px; display:flex; flex-direction:column;">
+                  <div
+                    style="font-family:'Newsreader',Georgia,serif; font-size:21px; letter-spacing:.1em; text-align:center; background:linear-gradient(90deg,#e836b8,#a855f7); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;">
+                    Eclipse</div>
+                  <div style="margin-top:10px; display:flex; align-items:baseline; gap:6px;"><span
+                      style="font-family:'Instrument Serif',Georgia,serif; font-size:48px; line-height:1;">$10</span><span
+                      style="font-size:14px; color:var(--muted);">For Maximum shielding and extended usage</span></div>
+                  <div
+                    style="margin-top:22px; display:flex; flex-direction:column; gap:11px; font-size:14px; color:var(--muted);">
+                    <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> Everything in
+                      Aegis</div>
+                    <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> Download fully
+                      redacted images</div>
+                    <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> Flagship Claude
+                      Opus vision model</div>
+                    <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> Saved scan
+                      history</div>
+                    <div style="display:flex; gap:9px;"><span style="color:var(--gold);">&check;</span> No subscription
+                      — pay only when you scan</div>
+                  </div>
+                  <div style="margin-top:auto; padding-top:24px;">
+                    <div
+                      style="padding:2px; border-radius:14px; background:conic-gradient(from var(--irisA) at 50% 50%, transparent 0deg, #2dffcf 13deg, #2dffcf 17deg, transparent 21deg, transparent 60deg, #38b6ff 73deg, #38b6ff 77deg, transparent 81deg, transparent 130deg, #9b6bff 143deg, #9b6bff 147deg, transparent 151deg, transparent 196deg, #ff5fd0 209deg, #ff5fd0 213deg, transparent 217deg, transparent 262deg, #ffb13d 275deg, #ffb13d 279deg, transparent 283deg, transparent 320deg, #4dff9e 332deg, #4dff9e 336deg, transparent 340deg, transparent 360deg), conic-gradient(from var(--chromeA) at 50% 50%, #ffffff 0deg, #c4cbd4 7deg, #474d57 18deg, #14161c 28deg, #b0b7c0 42deg, #ffffff 52deg, #565c66 64deg, #1a1d24 76deg, #cdd3db 90deg, #ffffff 100deg, #3c414b 116deg, #101218 130deg, #9aa1aa 148deg, #ffffff 160deg, #4a505a 174deg, #14161c 186deg, #c4cbd4 202deg, #ffffff 214deg, #50565f 230deg, #16181e 244deg, #b0b7c0 262deg, #ffffff 276deg, #3c414b 292deg, #101218 306deg, #aab1ba 326deg, #ffffff 344deg, #ffffff 360deg); background-size:100% 100%, 100% 100%; background-blend-mode:normal, normal; animation:irisSpin 15s linear infinite, chromeSpin 24s linear infinite; box-shadow:inset 0 1px 1px rgba(255,255,255,.65); transition:filter .25s, box-shadow .25s;"
+                      style-hover="filter:brightness(1.08); box-shadow:inset 0 1px 1px rgba(255,255,255,.7);">
+                      <button class="inv-btn" onClick="{{ onAddCredits }}"
+                        style="display:block; width:100%; border:none; cursor:pointer; padding:13px; border-radius:12px; background:var(--btn); color:var(--btn-ink); font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:14.5px;">Upgrade
+                        — $10.00</button>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <sc-if value="{{ hasPlanNote }}" hint-placeholder-val="{{ false }}">
+                <div
+                  style="max-width:1080px; margin:18px auto 0; text-align:center; font-size:13px; color:{{ planNoteColor }};">
+                  {{ planNoteText }}</div>
+              </sc-if>
+
+            </div>
+          </section>
+
+          <!-- FAQ -->
+          <section id="faq" data-screen-label="FAQ"
+            style="border-top:1px solid var(--border); padding:90px 24px 110px;">
+            <div style="max-width:760px; margin:0 auto;">
+              <div
+                style="font-family:'Newsreader',Georgia,serif; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold);">
+                FAQ</div>
+              <h2
+                style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:clamp(30px,4vw,46px); letter-spacing:-.01em; margin:10px 0 30px;">
+                Questions, answered.</h2>
+              <details style="border-top:1px solid var(--border); padding:18px 0;">
+                <summary
+                  style="display:flex; align-items:center; justify-content:space-between; gap:16px; font-family:'Instrument Serif',Georgia,serif; font-size:21px;">
+                  Do my photos get uploaded anywhere?<span class="faq-ic"
+                    style="flex:none; font-size:22px; color:var(--gold);">+</span></summary>
+                <p style="margin:12px 0 0; font-size:14.5px; line-height:1.6; color:var(--muted);">No. Everything runs
+                  locally in your browser — your photos never leave your device, on Aegis or Eclipse.</p>
+              </details>
+              <details style="border-top:1px solid var(--border); padding:18px 0;">
+                <summary
+                  style="display:flex; align-items:center; justify-content:space-between; gap:16px; font-family:'Instrument Serif',Georgia,serif; font-size:21px;">
+                  What exactly does Xyris remove?<span class="faq-ic"
+                    style="flex:none; font-size:22px; color:var(--gold);">+</span></summary>
+                <p style="margin:12px 0 0; font-size:14.5px; line-height:1.6; color:var(--muted);">GPS coordinates,
+                  camera make &amp; model, the capture date &amp; time, and software / OS tags embedded in the file. In
+                  the Pro Plan, it can also help you find further vulnerabilities in your photo which potential hackers
+                  can exploit to breach your information. Xyris Vision prevents this by giving you an option to modify
+                  certain parts of the image so that your data stays safe.</p>
+              </details>
+              <details style="border-top:1px solid var(--border); padding:18px 0;">
+                <summary
+                  style="display:flex; align-items:center; justify-content:space-between; gap:16px; font-family:'Instrument Serif',Georgia,serif; font-size:21px;">
+                  Will cleaning change how my photo looks?<span class="faq-ic"
+                    style="flex:none; font-size:22px; color:var(--gold);">+</span></summary>
+                <p style="margin:12px 0 0; font-size:14.5px; line-height:1.6; color:var(--muted);">No. The pixels stay
+                  the same — Xyris just re-saves the image without the hidden data attached.</p>
+              </details>
+              <details style="border-top:1px solid var(--border); padding:18px 0;">
+                <summary
+                  style="display:flex; align-items:center; justify-content:space-between; gap:16px; font-family:'Instrument Serif',Georgia,serif; font-size:21px;">
+                  Which file types are supported?<span class="faq-ic"
+                    style="flex:none; font-size:22px; color:var(--gold);">+</span></summary>
+                <p style="margin:12px 0 0; font-size:14.5px; line-height:1.6; color:var(--muted);">Any common image
+                  format — JPEG, PNG, WebP, GIF, BMP and more. Your cleaned copy is re-encoded in the same format
+                  wherever your browser supports it.</p>
+              </details>
+              <details
+                style="border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:18px 0;">
+                <summary
+                  style="display:flex; align-items:center; justify-content:space-between; gap:16px; font-family:'Instrument Serif',Georgia,serif; font-size:21px;">
+                  Is my original file modified?<span class="faq-ic"
+                    style="flex:none; font-size:22px; color:var(--gold);">+</span></summary>
+                <p style="margin:12px 0 0; font-size:14.5px; line-height:1.6; color:var(--muted);">Never. You download a
+                  clean copy; your original stays exactly as it was.</p>
+              </details>
+            </div>
+          </section>
+
+          <!-- ===== DISPERSION GRADIENT BAND ===== -->
+          <div aria-hidden="true" id="footer-disp"
+            style="height:90px; transition:height .3s cubic-bezier(.22,1,.36,1); background:linear-gradient(to top, transparent 30%, var(--bg) 100%), linear-gradient(100deg, #7c3aed 0%, #a83ad6 26%, #d6249f 48%, #f472b6 68%, #ffb13d 86%, #ffd23f 100%);">
+          </div>
+
+          <!-- ===== FOOTER ===== -->
+          <footer data-screen-label="Footer"
+            style="background:var(--surface); border-top:1px solid var(--border); color:var(--ink);">
+            <div style="max-width:1060px; margin:0 auto; padding:36px 24px 26px;">
+              <div
+                style="display:flex; flex-wrap:wrap; gap:32px; justify-content:space-between; align-items:flex-start;">
+                <div style="max-width:320px;">
+                  <div
+                    style="font-family:'Instrument Serif',Georgia,serif; font-size:28px; line-height:1; letter-spacing:-.01em;">
+                    Xyris Systems Inc.</div>
+                  <p
+                    style="margin:10px 0 0; font-family:'Newsreader',Georgia,serif; font-size:13.5px; line-height:1.5; color:var(--muted);">
+                    Strip the hidden data and scrub what photos reveal about you — entirely on your device.</p>
+                </div>
+                <div style="display:flex; gap:54px; flex-wrap:wrap;">
+                  <div style="display:flex; flex-direction:column; gap:9px;">
+                    <div
+                      style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted-2);">
+                      Product</div>
+                    <a href="#features" onClick="{{ onNavClick }}"
+                      style="font-family:'Newsreader',Georgia,serif; font-size:15px; color:var(--muted); text-decoration:none; transition:color .2s;"
+                      style-hover="color:var(--ink);">Features</a>
+                    <a href="#privacy" onClick="{{ onNavClick }}"
+                      style="font-family:'Newsreader',Georgia,serif; font-size:15px; color:var(--muted); text-decoration:none; transition:color .2s;"
+                      style-hover="color:var(--ink);">Privacy</a>
+                    <a href="#pricing" onClick="{{ onNavClick }}"
+                      style="font-family:'Newsreader',Georgia,serif; font-size:15px; color:var(--muted); text-decoration:none; transition:color .2s;"
+                      style-hover="color:var(--ink);">Pricing</a>
+                    <a href="#faq" onClick="{{ onNavClick }}"
+                      style="font-family:'Newsreader',Georgia,serif; font-size:15px; color:var(--muted); text-decoration:none; transition:color .2s;"
+                      style-hover="color:var(--ink);">FAQ</a>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:9px;">
+                    <div
+                      style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted-2);">
+                      Plans</div>
+                    <span style="font-family:'Newsreader',Georgia,serif; font-size:15px; color:var(--muted);">Aegis —
+                      Free</span>
+                    <span style="font-family:'Newsreader',Georgia,serif; font-size:15px; color:var(--muted);">Eclipse —
+                      $10</span>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="margin-top:30px; padding-top:18px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; align-items:center; font-family:'Newsreader',Georgia,serif; font-size:12.5px; color:var(--muted-2);">
+                <span>© 2026 Xyris</span>
+                <span>Runs entirely on your device — nothing is ever uploaded.</span>
+              </div>
+            </div>
+          </footer>
+
         </div>
-      </div>
+      </sc-if>
+
+      <!-- ===== PLANS / SETTINGS MODAL (migrated) ===== -->
+      <sc-if value="{{ plansOpen }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ onClosePlans }}"
+          style="position:fixed; inset:0; z-index:60; background:rgba(0,0,0,.62); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); display:flex; align-items:flex-start; justify-content:center; padding:40px 18px; overflow:auto;">
+          <div onClick="{{ onStop }}"
+            style="width:100%; max-width:980px; background:var(--surface); border:1px solid var(--border-strong); border-radius:22px; padding:28px; box-shadow:0 40px 100px rgba(0,0,0,.6);">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <button onClick="{{ onShowAccount }}"
+                style="background:none; border:none; cursor:pointer; font-family:'Instrument Serif',Georgia,serif; font-size:24px; color:{{ tabAccountColor }}; padding:0; transition:color .2s;">Account</button>
+              <span style="color:var(--muted-2); font-family:'Instrument Serif',Georgia,serif; font-size:22px;">·</span>
+              <button onClick="{{ onShowBilling }}"
+                style="background:none; border:none; cursor:pointer; font-family:'Instrument Serif',Georgia,serif; font-size:24px; color:{{ tabBillingColor }}; padding:0; transition:color .2s;">Billing</button>
+              <span style="color:var(--muted-2); font-family:'Instrument Serif',Georgia,serif; font-size:22px;">·</span>
+              <button onClick="{{ onOpenHistory }}"
+                style="background:none; border:none; cursor:pointer; font-family:'Instrument Serif',Georgia,serif; font-size:24px; color:{{ tabHistoryColor }}; padding:0; transition:color .2s;">History</button>
+              <div style="margin-left:auto; display:flex; align-items:center; gap:12px;">
+                <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}"><span
+                    style="font-size:12.5px; color:var(--muted);">{{ email }}</span></sc-if>
+                <button onClick="{{ onClosePlans }}" aria-label="Close"
+                  style="width:34px; height:34px; border-radius:50%; background:var(--card); border:1px solid var(--border); color:var(--ink); cursor:pointer; font-size:15px; line-height:1;">✕</button>
+              </div>
+            </div>
+
+            <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+              <div
+                style="margin-top:14px; border-radius:12px; padding:12px 16px; font-size:14px; background:var(--card); border:1px solid {{ toastBorder }}; color:var(--ink);">
+                {{ toast }}</div>
+            </sc-if>
+            <sc-if value="{{ hasPlanNote }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:14px; font-size:13px; color:{{ planNoteColor }};">{{ planNoteText }}</div>
+            </sc-if>
+
+            <sc-if value="{{ accountView }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:18px; display:flex; flex-direction:column; gap:14px;">
+                <div
+                  style="display:flex; align-items:center; gap:14px; border-radius:16px; padding:20px; background:var(--card); border:1px solid var(--border);">
+                  <div
+                    style="width:48px; height:48px; flex:none; border-radius:50%; background:#ffffff; display:flex; align-items:center; justify-content:center; color:#000000; font-family:'Instrument Serif',Georgia,serif; font-size:22px;">
+                    {{ accountInitial }}</div>
+                  <div style="min-width:0;">
+                    <div
+                      style="font-family:'Instrument Serif',Georgia,serif; font-size:20px; overflow:hidden; text-overflow:ellipsis;">
+                      {{ accountEmail }}</div>
+                    <div style="font-size:13px; color:var(--muted);">{{ accountPlan }} plan</div>
+                  </div>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px;">
+                  <div
+                    style="border-radius:14px; padding:18px; background:var(--card); border:1px solid var(--border);">
+                    <div
+                      style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);">
+                      Plan</div>
+                    <div style="font-family:'Instrument Serif',Georgia,serif; font-size:24px; margin-top:4px;">{{
+                      accountPlan }}</div>
+                  </div>
+                  <sc-if value="{{ accountShowCredits }}" hint-placeholder-val="{{ false }}">
+                    <div
+                      style="border-radius:14px; padding:18px; background:var(--card); border:1px solid var(--border);">
+                      <div
+                        style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);">
+                        Credits</div>
+                      <div
+                        style="font-family:'Instrument Serif',Georgia,serif; font-size:24px; margin-top:4px; color:{{ balanceColor }};">
+                        {{ balanceText }}</div>
+                    </div>
+                  </sc-if>
+                </div>
+                <sc-if value="{{ accountSignedIn }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ onSignOut }}"
+                    style="cursor:pointer; padding:12px; border-radius:12px; background:var(--card); border:1px solid var(--border-strong); color:var(--ink); font-family:'Newsreader',Georgia,serif; font-size:14px;">Sign
+                    out</button>
+                </sc-if>
+                <sc-if value="{{ accountNotSignedIn }}" hint-placeholder-val="{{ true }}">
+                  <button class="metal-btn inv-btn" onClick="{{ onOpenAuth }}"
+                    style="cursor:pointer; padding:13px; border-radius:12px; background:var(--grad); border:none; color:#0a0a12; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:14.5px;">Sign
+                    in / Create account</button>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ billingView }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:18px; display:flex; flex-direction:column; gap:16px;">
+                <div
+                  style="border-radius:16px; padding:22px 24px; background:var(--card); border:1px solid var(--border); display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap; align-items:baseline;">
+                  <div>
+                    <div
+                      style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);">
+                      Current tier</div>
+                    <div style="font-family:'Instrument Serif',Georgia,serif; font-size:30px; line-height:1.1;">{{
+                      tierLabel }}</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div
+                      style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);">
+                      Scanning credits</div>
+                    <div
+                      style="font-family:'Instrument Serif',Georgia,serif; font-size:30px; line-height:1.1; color:{{ balanceColor }};">
+                      {{ balanceText }}</div>
+                  </div>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px;">
+                  <div
+                    style="border-radius:16px; padding:22px; background:var(--card); border:1px solid var(--border);">
+                    <div style="font-family:'Instrument Serif',Georgia,serif; font-size:20px;">Aegis</div>
+                    <div
+                      style="margin-top:12px; display:flex; flex-direction:column; gap:8px; font-size:13.5px; color:var(--muted);">
+                      <div>Removes hidden metadata (GPS, device, time)</div>
+                      <div>Runs entirely on your device</div>
+                      <div>AI exposure report + red highlights</div>
+                      <div>Unlimited, always free</div>
+                    </div>
+                  </div>
+                  <div
+                    style="border-radius:16px; padding:22px; background:var(--card); border:1px solid var(--border);">
+                    <div style="font-family:'Instrument Serif',Georgia,serif; font-size:20px;">Eclipse — $10.00</div>
+                    <div
+                      style="margin-top:12px; display:flex; flex-direction:column; gap:8px; font-size:13.5px; color:var(--muted);">
+                      <div>Download fully redacted images</div>
+                      <div>Flagship Claude Opus vision model</div>
+                      <div>Saved scan history</div>
+                      <div>Credits last until spent — no expiry</div>
+                    </div>
+                    <button class="metal-btn inv-btn" onClick="{{ onAddCredits }}"
+                      style="margin-top:16px; width:100%; border:none; cursor:pointer; padding:13px; border-radius:12px; background:var(--grad); color:#0a0a12; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:14.5px;">Add
+                      Credits — $10.00</button>
+                  </div>
+                </div>
+                <div
+                  style="border-radius:16px; padding:20px 22px; background:var(--card); border:1px solid var(--border);">
+                  <div
+                    style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted-2);">
+                    Model pricing reference</div>
+                  <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
+                    <sc-for list="{{ costHints }}" as="h" hint-placeholder-count="0">
+                      <div style="display:flex; align-items:center; gap:9px; font-size:13.5px;">
+                        <span
+                          style="width:7px; height:7px; border-radius:50%; background:{{ h.dot }}; flex:none;"></span>
+                        <span>{{ h.label }}</span>
+                        <span style="margin-left:auto; color:var(--muted);">{{ h.perScan }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ historyView }}" hint-placeholder-val="{{ false }}">
+              <p style="margin:14px 0 14px; font-size:13.5px; color:var(--muted);">Saved scans from your AI
+                vulnerability checks. We log the model, risk and time — never the image.</p>
+              <sc-if value="{{ hasHistory }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                  <sc-for list="{{ histRows }}" as="r" hint-placeholder-count="0">
+                    <div
+                      style="display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px; background:var(--card); border:1px solid var(--border); font-size:13px; flex-wrap:wrap;">
+                      <span style="color:var(--muted-2); min-width:150px;">{{ r.when }}</span>
+                      <span style="font-family:'Newsreader',Georgia,serif;">{{ r.model }}</span>
+                      <span style="margin-left:auto; color:var(--muted);">risk: {{ r.risk }}</span>
+                      <span style="color:var(--muted-2);">{{ r.findings }} found</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ noHistory }}" hint-placeholder-val="{{ true }}">
+                <div
+                  style="border-radius:14px; padding:28px; text-align:center; background:var(--card); border:1px solid var(--border); color:var(--muted); font-size:14px;">
+                  No scans yet. Run an AI visual scan to start building history.</div>
+              </sc-if>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== BATCH CLEAN + ZIP MODAL ===== -->
+      <sc-if value="{{ batchOpen }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ onCloseBatch }}"
+          style="position:fixed; inset:0; z-index:66; background:rgba(0,0,0,.62); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); display:flex; align-items:flex-start; justify-content:center; padding:40px 18px; overflow:auto;">
+          <div onClick="{{ onStop }}"
+            style="width:100%; max-width:880px; background:var(--surface); border:1px solid var(--border-strong); border-radius:22px; padding:28px; box-shadow:0 40px 100px rgba(0,0,0,.6);">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div style="font-family:'Instrument Serif',Georgia,serif; font-size:24px;">Batch clean</div>
+              <span style="font-size:13px; color:var(--muted);">{{ batchCountLabel }}</span>
+              <button onClick="{{ onCloseBatch }}" aria-label="Close"
+                style="margin-left:auto; width:34px; height:34px; border-radius:50%; background:var(--card); border:1px solid var(--border); color:var(--ink); cursor:pointer; font-size:15px;">✕</button>
+            </div>
+            <p style="margin:8px 0 0; font-size:13.5px; color:var(--muted);">Metadata is stripped from every photo on
+              your device. Download them all as a single zip.</p>
+            <sc-if value="{{ hasBatch }}" hint-placeholder-val="{{ false }}">
+              <div
+                style="margin-top:18px; display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px;">
+                <sc-for list="{{ batchCards }}" as="b" hint-placeholder-count="0">
+                  <div
+                    style="position:relative; border-radius:12px; overflow:hidden; border:1px solid var(--border); background:var(--card);">
+                    <div style="{{ b.thumbStyle }}"></div>
+                    <button data-index="{{ b.index }}" onClick="{{ onRemoveBatch }}" aria-label="Remove"
+                      style="position:absolute; top:6px; right:6px; width:22px; height:22px; border-radius:50%; background:rgba(8,8,16,.72); border:none; color:#fff; cursor:pointer; font-size:11px; line-height:1;">✕</button>
+                    <div
+                      style="padding:7px 9px; font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                      {{ b.name }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ batchBusy }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:16px; font-size:13.5px; color:var(--muted);">Processing…</div>
+            </sc-if>
+            <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="metal-btn inv-btn" onClick="{{ onDownloadZip }}"
+                style="border:none; cursor:pointer; padding:13px 22px; border-radius:12px; background:var(--grad); color:#0a0a12; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:14.5px;">Download
+                all (.zip) ↓</button>
+              <button onClick="{{ onAddMoreBatch }}"
+                style="cursor:pointer; padding:13px 20px; border-radius:12px; background:var(--card); border:1px solid var(--border-strong); color:var(--ink); font-family:'Newsreader',Georgia,serif; font-size:14.5px;">Add
+                more</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== AUTH / SIGN-IN MODAL ===== -->
+      <sc-if value="{{ authOpen }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ onCloseAuth }}"
+          style="position:fixed; inset:0; z-index:75; background:rgba(0,0,0,.62); -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px); display:flex; align-items:center; justify-content:center; padding:24px;">
+          <div onClick="{{ onStop }}"
+            style="max-width:400px; width:100%; background:var(--surface); border:1px solid var(--border-strong); border-radius:18px; padding:30px; text-align:center; box-shadow:0 40px 100px rgba(0,0,0,.6);">
+            <h3 style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:25px; margin:0;">Create
+              your Xyris account</h3>
+            <p style="margin:10px 0 0; font-size:14px; line-height:1.5; color:var(--muted);">Needed to run the AI scan
+              and manage your Eclipse plan. Your photos are never uploaded.</p>
+            <div style="margin-top:22px; display:flex; flex-direction:column; gap:10px;">
+              <button onClick="{{ onSignInGoogle }}"
+                style="display:flex; align-items:center; justify-content:center; gap:11px; cursor:pointer; padding:13px; border-radius:12px; background:var(--btn); color:var(--btn-ink); border:none; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:14.5px;"><span
+                  style="width:20px; height:20px; border-radius:50%; background:#fff; border:1px solid rgba(0,0,0,.15); color:#4285F4; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">G</span>
+                Continue with Google</button>
+            </div>
+            <button onClick="{{ onCloseAuth }}"
+              style="margin-top:14px; cursor:pointer; background:none; border:none; color:var(--muted); font-family:'Newsreader',Georgia,serif; font-size:13px;">Maybe
+              later</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== CREDITS-EXHAUSTED MODAL (migrated) ===== -->
+      <sc-if value="{{ creditsOpen }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ onCloseCredits }}"
+          style="position:fixed; inset:0; z-index:70; background:rgba(0,0,0,.6); -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px); display:flex; align-items:center; justify-content:center; padding:24px;">
+          <div onClick="{{ onStop }}"
+            style="max-width:440px; width:100%; background:var(--surface); border:1px solid var(--border-strong); border-radius:18px; padding:30px; text-align:center; box-shadow:0 40px 100px rgba(0,0,0,.6);">
+            <div
+              style="width:46px; height:46px; margin:0 auto; border-radius:50%; background:rgba(251,191,36,.14); border:1px solid rgba(251,191,36,.4); display:flex; align-items:center; justify-content:center; color:#fbbf24; font-family:'Instrument Serif',Georgia,serif; font-size:24px;">
+              !</div>
+            <h3 style="font-family:'Instrument Serif',Georgia,serif; font-weight:400; font-size:25px; margin:14px 0 0;">
+              This scan needs credits.</h3>
+            <p style="margin:12px 0 0; font-size:14px; line-height:1.55; color:var(--muted);">Your Aegis plan still
+              removes hidden metadata on-device. To run the AI visual scan on a paid model, top up credits.</p>
+            <div style="margin-top:22px; display:flex; flex-direction:column; gap:10px;">
+              <button class="metal-btn inv-btn" onClick="{{ onAddCredits }}"
+                style="border:none; cursor:pointer; padding:14px; border-radius:12px; background:var(--grad); color:#0a0a12; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:15px;">Add
+                Credits — $10.00</button>
+              <button onClick="{{ onCloseCredits }}"
+                style="cursor:pointer; padding:10px; border-radius:12px; background:none; border:none; color:var(--muted); font-family:'Newsreader',Georgia,serif; font-size:13.5px;">Continue
+                with Aegis plan</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
     </div>
-  </sc-if>
-</div>
-</x-dc>
-<script type="text/x-dc" data-dc-script data-props="{
+  </x-dc>
+  <script type="text/x-dc" data-dc-script data-props="{
   &quot;$preview&quot;: { &quot;width&quot;: 1200, &quot;height&quot;: 820 },
   &quot;palette&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;Aurora&quot;, &quot;options&quot;: [&quot;Aurora&quot;, &quot;Neon&quot;, &quot;Sunset&quot;, &quot;Violet haze&quot;], &quot;tsType&quot;: &quot;string&quot; },
   &quot;grain&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot; }
@@ -797,6 +1582,16 @@ class Component extends DCLogic {
           if (link) { ul.style.left = link.offsetLeft + 'px'; ul.style.width = link.offsetWidth + 'px'; ul.style.opacity = '1'; }
           else { ul.style.opacity = '0'; }
         }
+      }
+      const disp = document.getElementById('footer-disp');
+      if (disp) {
+        const faq = document.getElementById('faq');
+        const ref = faq ? faq.getBoundingClientRect().bottom : window.innerHeight;
+        const trigger = window.innerHeight - ref;
+        const range = 380;
+        const f = Math.max(0, Math.min(1, trigger / range));
+        const eased = f * f * (3 - 2 * f);
+        disp.style.height = Math.round(80 + eased * 190) + 'px';
       }
     };
     window.addEventListener('scroll', this._onScroll, { passive: true });
@@ -1186,7 +1981,7 @@ class Component extends DCLogic {
       stage: 'idle', error: '', fileName: '', file: null,
       originalUrl: null, cleanUrl: null, leaks: [], faceBoxes: [], reveal: false, imgAspect: '4 / 3', dragOver: false,
       vStage: 'collapsed', vError: '', vFindings: [], vReport: null, vReveal: false, vDemo: false,
-      geoPlace: '', geoStatus: '', activeHoverIndex: null,
+      geoPlace: '', geoStatus: '',
     });
   };
 
@@ -1345,15 +2140,38 @@ class Component extends DCLogic {
     return { base64: b64, url: res.url };
   }
 
-  locationToRect(loc) {
-    switch (loc) {
-      case 'top-left': return { x: 2, y: 2, w: 48, h: 48 };
-      case 'top-right': return { x: 50, y: 2, w: 48, h: 48 };
-      case 'bottom-left': return { x: 2, y: 50, w: 48, h: 48 };
-      case 'bottom-right': return { x: 50, y: 50, w: 48, h: 48 };
-      case 'center': return { x: 25, y: 25, w: 50, h: 50 };
-      default: return { x: 3, y: 3, w: 94, h: 94 };
+  findingRect(f) {
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    const num = (v) => (typeof v === 'number' ? v : parseFloat(v));
+    // 1) Precise coordinates, if the model / back-end provides a bounding box.
+    const box = f && (f.bbox || f.box || f.bounding_box || f.region);
+    if (box && typeof box === 'object') {
+      let x = num(box.x), y = num(box.y);
+      let w = num(box.w != null ? box.w : box.width), h = num(box.h != null ? box.h : box.height);
+      // Accept either 0–1 normalised or 0–100 percentage coordinates.
+      if ([x, y, w, h].every((n) => isFinite(n) && Math.abs(n) <= 1)) { x *= 100; y *= 100; w *= 100; h *= 100; }
+      if ([x, y, w, h].every(isFinite) && w > 0 && h > 0) {
+        const pad = 1.5; // hairline margin so the element is fully covered
+        x = clamp(x - pad, 0, 100); y = clamp(y - pad, 0, 100);
+        w = clamp(w + pad * 2, 1, 100 - x); h = clamp(h + pad * 2, 1, 100 - y);
+        return { x, y, w, h };
+      }
     }
+    // 2) Fallback: a COMPACT box anchored on the rough zone, sized to the threat
+    //    type — never a whole quadrant. Keeps redaction to the harmful area only.
+    const anchors = {
+      'top-left': [27, 27], 'top-right': [73, 27], 'center': [50, 50],
+      'bottom-left': [27, 73], 'bottom-right': [73, 73], 'full-image': [50, 50],
+    };
+    const [cx, cy] = anchors[f && f.rough_location] || [50, 50];
+    const t = f && f.type;
+    let w, h;
+    if (['license_plate', 'house_number', 'street_sign', 'face', 'reflection', 'school_logo'].indexOf(t) !== -1) { w = 26; h = 20; }
+    else if (t === 'window_view' || t === 'landmark') { w = 36; h = 30; }
+    else { w = 30; h = 24; }
+    const x = clamp(cx - w / 2, 0, 100 - w);
+    const y = clamp(cy - h / 2, 0, 100 - h);
+    return { x, y, w, h };
   }
 
   onRunVisual = async () => {
@@ -1395,219 +2213,40 @@ class Component extends DCLogic {
     setTimeout(() => { this.paintAICanvas(); this.setState({ vReveal: true }); }, 40);
   };
 
-  parseReport(text) {
-    try { const clean = String(text).replace(/```json|```/g, '').trim(); const p = JSON.parse(clean); if (p && typeof p === 'object') return p; } catch (e) {}
-    return { risk_level: 'unknown', summary: String(text).slice(0, 300), findings: [] };
-  }
-
   demoReport() {
     return {
       risk_level: 'high',
       summary: 'Demo scan — this image reveals a readable street sign, a license plate and a reflected face. Sign in and upgrade to Pro to run the real Claude Opus scan.',
       findings: [
-        { type: 'face', label: 'Subject face', description: 'A readable face in the top-left pins the person.', severity: 'high', bbox: [5, 5, 20, 30], polygon: [[5,5],[12,4],[20,6],[20,28],[12,30],[5,28]] },
-        { type: 'badge', label: 'ID badge', description: 'ID badge displaying name and role.', severity: 'high', bbox: [70, 80, 95, 95], polygon: [[70,80],[95,80],[95,95],[70,95]] },
-        { type: 'reflection', label: 'Reflection', description: 'A face is visible in a window reflection.', severity: 'medium', bbox: [45, 40, 55, 60], polygon: [[47,40],[55,42],[54,60],[45,58],[46,42]] },
+        { type: 'street_sign', description: 'A readable street-name sign in the top-left pins the neighbourhood.', severity: 'high', rough_location: 'top-left', bbox: { x: 6, y: 8, w: 22, h: 12 } },
+        { type: 'license_plate', description: 'A vehicle license plate is legible enough to trace ownership.', severity: 'high', rough_location: 'bottom-right', bbox: { x: 62, y: 74, w: 24, h: 11 } },
+        { type: 'reflection', description: 'A face is visible in a window reflection near the centre.', severity: 'medium', rough_location: 'center', bbox: { x: 43, y: 38, w: 16, h: 18 } },
       ],
     };
   }
 
-  // Return polygon (% coords) for a finding — prefer polygon, fallback to bbox corners
-  getPolygon(f) {
-    if (f.polygon && Array.isArray(f.polygon) && f.polygon.length >= 3) return f.polygon;
-    if (f.bbox && Array.isArray(f.bbox) && f.bbox.length === 4) {
-      const [x0, y0, x1, y1] = f.bbox;
-      return [[x0,y0],[x1,y0],[x1,y1],[x0,y1]];
-    }
-    return [[35,35],[65,35],[65,65],[35,65]];
-  }
-
-  // Build a canvas polygon path from % coords
-  polyPath(ctx, poly, cw, ch) {
-    ctx.beginPath();
-    poly.forEach(([px,py], i) => {
-      const x = (px/100)*cw, y = (py/100)*ch;
-      i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-    });
-    ctx.closePath();
-  }
-
-  // Ray-cast point-in-polygon — polygon in % coords, point in canvas px
-  pointInPoly(mx, my, poly, cw, ch) {
-    let inside = false;
-    for (let i=0, j=poly.length-1; i<poly.length; j=i++) {
-      const xi=(poly[i][0]/100)*cw, yi=(poly[i][1]/100)*ch;
-      const xj=(poly[j][0]/100)*cw, yj=(poly[j][1]/100)*ch;
-      const intersect = ((yi>my) !== (yj>my)) && (mx < (xj-xi)*(my-yi)/(yj-yi)+xi);
-      if (intersect) inside = !inside;
-    }
-    return inside;
-  }
-
   paintAICanvas() {
-    const canvas = document.getElementById('ai-canvas');
-    const img = this._aiBaseImg;
+    const canvas = document.getElementById('ai-canvas'); const img = this._aiBaseImg;
     if (!canvas || !img) return;
-    canvas.width = img.naturalWidth || img.width;
-    canvas.height = img.naturalHeight || img.height;
-    const cw = canvas.width, ch = canvas.height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-
-    const findings = this.state.vFindings || [];
-    const activeIdx = this.state.activeHoverIndex;
-    const SEVc = { high: '#fb7185', medium: '#fbbf24', low: '#34d399' };
-
-    // Pass 1: feathered content-aware redaction inside each polygon
-    findings.forEach((f) => {
-      if (!f.redacted) return;
-      const poly = this.getPolygon(f);
-      const xs = poly.map(p=>p[0]), ys = poly.map(p=>p[1]);
-      const bx = Math.round((Math.min(...xs)/100)*cw);
-      const by = Math.round((Math.min(...ys)/100)*ch);
-      const bw = Math.max(4, Math.round(((Math.max(...xs)-Math.min(...xs))/100)*cw));
-      const bh = Math.max(4, Math.round(((Math.max(...ys)-Math.min(...ys))/100)*ch));
-
-      // Sample surrounding border pixels for average colour
-      const pad = Math.max(14, Math.round(Math.min(bw,bh)*0.15));
-      let rS=0,gS=0,bS=0,cnt=0;
-      const regions = [
-        {sx:Math.max(0,bx-pad), sy:by, sw:pad, sh:bh},
-        {sx:Math.min(cw-pad,bx+bw), sy:by, sw:pad, sh:bh},
-        {sx:bx, sy:Math.max(0,by-pad), sw:bw, sh:pad},
-        {sx:bx, sy:Math.min(ch-pad,by+bh), sw:bw, sh:pad},
-      ];
-      regions.forEach(({sx,sy,sw,sh})=>{
-        if(sw<=0||sh<=0) return;
-        try { const d=ctx.getImageData(sx,sy,sw,sh).data; for(let j=0;j<d.length;j+=4){rS+=d[j];gS+=d[j+1];bS+=d[j+2];cnt++;} } catch(e){}
-      });
-      const avgR=cnt>0?Math.round(rS/cnt):30, avgG=cnt>0?Math.round(gS/cnt):30, avgB=cnt>0?Math.round(bS/cnt):30;
-
-      // Clip to polygon shape, then apply blur + blended fill
-      ctx.save();
-      this.polyPath(ctx, poly, cw, ch);
-      ctx.clip();
-      ctx.filter = 'blur(12px)';
-      ctx.drawImage(canvas, bx-pad, by-pad, bw+pad*2, bh+pad*2, bx-pad, by-pad, bw+pad*2, bh+pad*2);
-      ctx.filter = 'blur(8px)';
-      ctx.drawImage(canvas, bx-pad, by-pad, bw+pad*2, bh+pad*2, bx-pad, by-pad, bw+pad*2, bh+pad*2);
-      ctx.filter = 'none';
-      ctx.fillStyle = `rgba(${avgR},${avgG},${avgB},0.80)`;
-      ctx.fill();
-      // Feathered edge darkening
-      const featherGrad = ctx.createRadialGradient(bx+bw/2,by+bh/2,Math.min(bw,bh)*0.28,bx+bw/2,by+bh/2,Math.max(bw,bh)*0.72);
-      featherGrad.addColorStop(0,'rgba(0,0,0,0)');
-      featherGrad.addColorStop(1,'rgba(0,0,0,0.20)');
-      ctx.fillStyle = featherGrad;
-      ctx.fill();
-      ctx.restore();
-    });
-
-    // Pass 2: draw lasso polygon outlines for non-redacted findings
-    findings.forEach((f, i) => {
-      if (f.redacted) return;
-      const poly = this.getPolygon(f);
-      const col = SEVc[f.severity] || '#fb7185';
-      const isHovered = i === activeIdx;
-
-      ctx.save();
-      this.polyPath(ctx, poly, cw, ch);
-      if (isHovered) {
-        // Thick glowing dashed outline on hover
-        ctx.shadowColor = col;
-        ctx.shadowBlur = 22;
-        ctx.strokeStyle = col;
-        ctx.lineWidth = 3;
-        ctx.setLineDash([10, 5]);
-        ctx.stroke();
-        // Inner white sheen
-        this.polyPath(ctx, poly, cw, ch);
-        ctx.shadowBlur = 0;
-        ctx.setLineDash([]);
-        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      } else {
-        // Thin resting lasso
-        ctx.shadowColor = col;
-        ctx.shadowBlur = 10;
-        ctx.strokeStyle = col;
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([7, 5]);
-        ctx.stroke();
-      }
-      ctx.restore();
-    });
+    canvas.width = img.naturalWidth || img.width; canvas.height = img.naturalHeight || img.height;
+    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0);
   }
-
-  // Canvas mouse move: hit-test polygons, show floating tooltip, update hover highlight
-  onCanvasMouseMove = (e) => {
-    const canvas = document.getElementById('ai-canvas');
-    const tip = document.getElementById('ai-lasso-tip');
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const mx = (e.clientX - rect.left) * scaleX;
-    const my = (e.clientY - rect.top) * scaleY;
-    const findings = this.state.vFindings || [];
-    let hit = -1;
-    for (let i=0; i<findings.length; i++) {
-      if (findings[i].redacted) continue;
-      if (this.pointInPoly(mx, my, this.getPolygon(findings[i]), canvas.width, canvas.height)) { hit=i; break; }
-    }
-    if (hit !== (this.state.activeHoverIndex === null ? -1 : this.state.activeHoverIndex)) {
-      this.setState({ activeHoverIndex: hit === -1 ? null : hit }, () => this.paintAICanvas());
-    }
-    if (tip) {
-      if (hit >= 0) {
-        const f = findings[hit];
-        const SEVL2 = { high:'HIGH RISK', medium:'MEDIUM', low:'LOW' };
-        tip.textContent = `${f.label || String(f.type||'').replace(/_/g,' ')} — ${SEVL2[f.severity]||f.severity||''}`;
-        const wrapRect = canvas.parentElement ? canvas.parentElement.getBoundingClientRect() : rect;
-        tip.style.display = 'block';
-        tip.style.left = Math.min(e.clientX - wrapRect.left + 14, wrapRect.width - 190) + 'px';
-        tip.style.top = Math.max(0, e.clientY - wrapRect.top - 40) + 'px';
-      } else {
-        tip.style.display = 'none';
-      }
-    }
-  };
-
-  onCanvasMouseLeave = () => {
-    const tip = document.getElementById('ai-lasso-tip');
-    if (tip) tip.style.display = 'none';
-    this.setState({ activeHoverIndex: null }, () => this.paintAICanvas());
-  };
-
-  // Canvas click: toggle redaction on whichever polygon the user clicked inside
-  onCanvasClick = (e) => {
-    const canvas = document.getElementById('ai-canvas');
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const mx = (e.clientX - rect.left) * scaleX;
-    const my = (e.clientY - rect.top) * scaleY;
-    const findings = this.state.vFindings || [];
-    for (let i=0; i<findings.length; i++) {
-      if (this.pointInPoly(mx, my, this.getPolygon(findings[i]), canvas.width, canvas.height)) {
-        this.setState((st) => ({
-          vFindings: st.vFindings.map((x,j) => j===i ? {...x, redacted: !x.redacted} : x)
-        }), () => this.paintAICanvas());
-        return;
-      }
-    }
-  };
 
   redactFinding = (e) => {
     const i = parseInt(e.currentTarget.dataset.index, 10);
-    this.setState((st) => {
-      const vFindings = st.vFindings.map((x2, j) => (j === i ? { ...x2, redacted: !x2.redacted } : x2));
-      return { vFindings };
-    }, () => {
-      this.paintAICanvas();
-    });
+    const f = this.state.vFindings[i];
+    if (!f || f.redacted) return;
+    const canvas = document.getElementById('ai-canvas'); const img = this._aiBaseImg;
+    if (!canvas || !img) return;
+    const rect = this.findingRect(f);
+    const ctx = canvas.getContext('2d');
+    const x = (rect.x / 100) * canvas.width, y = (rect.y / 100) * canvas.height, w = (rect.w / 100) * canvas.width, h = (rect.h / 100) * canvas.height;
+    // True redaction: overwrite the pixels with solid, fully-opaque black so nothing
+    // underneath survives in the exported image (blur/translucency are recoverable).
+    ctx.save(); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; ctx.filter = 'none'; ctx.fillStyle = '#000000'; ctx.fillRect(x, y, w, h); ctx.restore();
+    const fs = Math.max(11, Math.min(w, h) * 0.13);
+    ctx.save(); ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.font = '600 ' + fs + "px Georgia, serif"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('REDACTED', x + w / 2, y + h / 2); ctx.restore();
+    this.setState((st) => ({ vFindings: st.vFindings.map((x2, j) => (j === i ? { ...x2, redacted: true } : x2)) }));
   };
 
   onDownloadRedacted = () => {
@@ -1808,14 +2447,27 @@ class Component extends DCLogic {
       const locked = m.tier === 'paid' && !paidAccess;
       return { id: m.id, label: m.label + (locked ? ' — needs key / credits' : ''), disabled: locked };
     });
+    const SEVc = { high: '#fb7185', medium: '#fbbf24', med: '#fbbf24', low: '#34d399' };
     const SEVL = { high: ['HIGH RISK', '#fb7185'], medium: ['MEDIUM', '#fbbf24'], med: ['MEDIUM', '#fbbf24'], low: ['LOW', '#34d399'] };
     const vFindings = s.vFindings || [];
+    const vReveal = s.vReveal;
+    const vBoxes = vFindings.map((f, i) => {
+      const r = this.findingRect(f);
+      const col = f.redacted ? '#34d399' : (SEVc[f.severity] || '#fb7185');
+      const dl = (0.05 + i * 0.08).toFixed(2);
+      return {
+        index: i,
+        label: f.redacted ? '✓ redacted' : String(f.type || '').replace(/_/g, ' '),
+        boxStyle: `position:absolute; left:${r.x}%; top:${r.y}%; width:${r.w}%; height:${r.h}%; border:2px solid ${col}; background:${f.redacted ? 'transparent' : 'rgba(226,75,74,.14)'}; border-radius:10px; cursor:${f.redacted ? 'default' : 'pointer'}; display:flex; align-items:flex-start; justify-content:flex-start; padding:6px; opacity:${vReveal ? 1 : 0}; transform:scale(${vReveal ? 1 : 1.05}); transition:opacity .4s ease ${dl}s, transform .4s ease ${dl}s, border-color .2s, background .2s;`,
+        tagStyle: `font-size:10px; letter-spacing:.04em; color:#fff; background:rgba(8,8,16,.7); padding:2px 7px; border-radius:6px; pointer-events:none;`,
+      };
+    });
     const vCards = vFindings.map((f, i) => {
       const sl = SEVL[f.severity] || SEVL.medium;
       return {
         index: i, type: String(f.type || '').replace(/_/g, ' ').toUpperCase(), desc: f.description || '',
-        sevLabel: sl[0], sevColor: sl[1], redacted: !!f.redacted, btnLabel: f.redacted ? 'Undo Redact' : 'Redact',
-        btnStyle: `margin-top:9px; font-size:12px; cursor:pointer; padding:6px 12px; border-radius:8px; border:1px solid var(--border-strong); background:${f.redacted ? 'rgba(52,211,153,.12)' : 'var(--card)'}; color:${f.redacted ? '#34d399' : 'var(--ink)'}; font-family:'Newsreader',Georgia,serif; transition: background 0.2s;`,
+        sevLabel: sl[0], sevColor: sl[1], redacted: !!f.redacted, btnLabel: f.redacted ? '✓ Redacted' : 'Redact',
+        btnStyle: `margin-top:9px; font-size:12px; cursor:${f.redacted ? 'default' : 'pointer'}; padding:6px 12px; border-radius:8px; border:1px solid var(--border-strong); background:${f.redacted ? 'rgba(52,211,153,.12)' : 'var(--card)'}; color:${f.redacted ? '#34d399' : 'var(--ink)'}; font-family:'Newsreader',Georgia,serif;`,
       };
     });
     const vRisk = (s.vReport && s.vReport.risk_level) ? s.vReport.risk_level : 'unknown';
@@ -1867,8 +2519,7 @@ class Component extends DCLogic {
       costHints: this.COST_HINTS(),
       vCollapsed: s.vStage === 'collapsed', vScanning: s.vStage === 'scanning', vResults: s.vStage === 'results',
       vErrorState: s.vStage === 'error', vError: s.vError,
-      vBoxes: [], 
-      vCards, vHasFindings: vFindings.length > 0, vFindingCount: vFindings.length,
+      vBoxes, vCards, vHasFindings: vFindings.length > 0, vFindingCount: vFindings.length,
       vSummary: s.vReport ? (s.vReport.summary || '') : '', hasVSummary: !!(s.vReport && s.vReport.summary),
       vRiskDot, vIsDemo: s.vDemo, showDemoNote: !paidAccess && !backendOn,
       vTitle: vFindings.length ? (vFindings.length + ' visible ' + (vFindings.length > 1 ? 'risks' : 'risk') + ' found') : 'No obvious visible risks',
@@ -1890,7 +2541,6 @@ class Component extends DCLogic {
       onShowPlansTab: this.onShowPlansTab, onShowBilling: this.onShowBilling, onCloseCredits: this.onCloseCredits, onStop: this.onStop,
       onModelChange: this.onModelChange,
       onAddCredits: this.onAddCredits, onRunVisual: this.onRunVisual, redactFinding: this.redactFinding,
-      onCanvasMouseMove: this.onCanvasMouseMove, onCanvasMouseLeave: this.onCanvasMouseLeave, onCanvasClick: this.onCanvasClick,
       onDownloadRedacted: this.onDownloadRedacted, onDownloadStripped: this.onDownloadStripped,
       onSignIn: this.onSignIn, onSignOut: this.onSignOut, onOpenAuth: this.onOpenAuth, onCloseAuth: this.onCloseAuth,
       onSignInGoogle: this.onSignInGoogle, onShowAccount: this.onShowAccount, onOpenAccount: this.onOpenAccount,
@@ -1903,4 +2553,5 @@ class Component extends DCLogic {
 }
 </script>
 </body>
+
 </html>
