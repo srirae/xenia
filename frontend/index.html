@@ -1245,13 +1245,13 @@ class Component extends DCLogic {
 
   // ─────────────────────── migrated: persisted feature state ───────────────
   async loadFeatureState() {
-    // Local-first so the app always works (offline / preview).
+    // Credits & tier are NEVER granted locally — the free tier always has $0 and
+    // no paid access until the backend confirms a real Stripe purchase (or the
+    // admin account). Only scan history is restored from localStorage.
     try {
-      const tier = localStorage.getItem('xenlens-tier') || 'free';
-      const bal = parseFloat(localStorage.getItem('xenlens-balance') || '0') || 0;
       let hist = [];
       try { hist = JSON.parse(localStorage.getItem('xenlens-history') || '[]') || []; } catch (e) {}
-      this.setState({ tier, balance: bal, history: hist });
+      this.setState({ tier: 'free', balance: 0, isAdmin: false, history: hist });
     } catch (e) {}
     // Backend is the source of truth once configured + signed in.
     const c = this.APP_CONFIG();
@@ -1279,7 +1279,7 @@ class Component extends DCLogic {
       { label: 'Claude Opus — Anthropic flagship', dot: '#fb7185', perScan: 'included with Pro' },
     ];
   }
-  hasPaidAccess() { return this.state.tier === 'paid'; }
+  hasPaidAccess() { return this.state.isAdmin || this.state.tier === 'paid'; }
 
   // ── plans / modals ──
   onStop = (e) => { e.stopPropagation(); };
@@ -1313,23 +1313,27 @@ class Component extends DCLogic {
   onCloseCredits = () => this.setState({ creditsOpen: false });
   onModelChange = (e) => { const m = e.target.value; this.setState({ chosenModel: m }); try { localStorage.setItem('xenlens-model', m); } catch (e2) {} };
 
-  // Real Stripe Checkout when the backend is configured; otherwise a local demo
-  // top-up so the paid flow is testable in this preview.
+  // The ONLY way to get credits is a real Stripe Checkout. No local/demo grant —
+  // a free user has $0 until they actually pay. Clicking opens the payment link
+  // and redirects to Stripe.
   onAddCredits = async () => {
-    const c = this.APP_CONFIG();
-    if (c.apiUrl && c.supabaseUrl) {
-      try {
-        const session = await this.getSession();
-        if (!session) { await this.onSignIn(); return; }
-        const data = await this.apiFetch('/api/stripe/checkout', { method: 'POST' });
-        if (data && data.url) { window.location.href = data.url; return; }
-        this.setState({ planNote: 'err:Could not start checkout. Please try again.' });
-      } catch (e) { this.setState({ planNote: 'err:Could not start checkout. Please try again.' }); }
+    // Admins ride on the platform key and never buy credits.
+    if (this.state.isAdmin) {
+      this.setState({ creditsOpen: false, planNote: 'ok:Admin access — credits are not required.' });
       return;
     }
-    const bal = Math.round((this.state.balance + 5) * 1e6) / 1e6;
-    try { localStorage.setItem('xenlens-tier', 'paid'); localStorage.setItem('xenlens-balance', String(bal)); } catch (e) {}
-    this.setState({ tier: 'paid', balance: bal, creditsOpen: false, planNote: 'ok:Demo mode — this preview has no backend, so no real charge was made. Connect Stripe (see DEPLOY.md) to take live payments.' });
+    const c = this.APP_CONFIG();
+    if (!c.apiUrl || !c.supabaseUrl) {
+      this.setState({ planNote: 'err:Payments need the backend configured (window.XENLENS_CONFIG) — see DEPLOY.md.' });
+      return;
+    }
+    try {
+      const session = await this.getSession();
+      if (!session) { await this.onSignIn(); return; }
+      const data = await this.apiFetch('/api/stripe/checkout', { method: 'POST' });
+      if (data && data.url) { window.location.href = data.url; return; }
+      this.setState({ planNote: 'err:Could not start checkout. Please try again.' });
+    } catch (e) { this.setState({ planNote: 'err:Could not start checkout. Please try again.' }); }
   };
 
   // ─────────────────────────── migrated: AI visual scan ────────────────────
@@ -1693,11 +1697,11 @@ class Component extends DCLogic {
 
       // ── migrated features ──
       plansOpen: s.plansOpen, creditsOpen: s.creditsOpen, historyView: s.modalTab === 'history', billingView: s.modalTab === 'billing',
-      hasPaidAccess: paidAccess, tier: s.tier,
-      tierLabel: s.tier === 'paid' ? 'Eclipse' : 'Aegis',
-      balanceText: '$' + (Number(s.balance) || 0).toFixed(2),
-      lowBalance: s.tier === 'paid' && (Number(s.balance) || 0) < 0.5,
-      showCreditsBadge: s.tier === 'paid',
+      hasPaidAccess: paidAccess, tier: s.tier, isAdmin: s.isAdmin,
+      tierLabel: s.isAdmin ? 'Admin' : (s.tier === 'paid' ? 'Eclipse' : 'Aegis'),
+      balanceText: s.isAdmin ? 'Unlimited' : '$' + (Number(s.balance) || 0).toFixed(2),
+      lowBalance: !s.isAdmin && s.tier === 'paid' && (Number(s.balance) || 0) < 0.5,
+      showCreditsBadge: s.isAdmin || s.tier === 'paid',
       modelOptions, chosenModelId: s.chosenModel, curModelLabel: curModel.label, showModelSwitcher: paidAccess,
       costHints: this.COST_HINTS(),
       vCollapsed: s.vStage === 'collapsed', vScanning: s.vStage === 'scanning', vResults: s.vStage === 'results',
@@ -1712,13 +1716,13 @@ class Component extends DCLogic {
       backendOn, signedIn: s.signedIn, email: s.email, showAuth: true,
       authOpen: s.authOpen, accountView: s.modalTab === 'account',
       accountSignedIn: s.signedIn, accountNotSignedIn: !s.signedIn,
-      accountEmail: s.email || 'Not signed in', accountPlan: s.tier === 'paid' ? 'Eclipse' : 'Aegis',
-      accountShowCredits: s.tier === 'paid', accountInitial: (s.email ? s.email[0] : 'X').toUpperCase(),
+      accountEmail: s.email || 'Not signed in', accountPlan: s.isAdmin ? 'Admin' : (s.tier === 'paid' ? 'Eclipse' : 'Aegis'),
+      accountShowCredits: s.isAdmin || s.tier === 'paid', accountInitial: (s.email ? s.email[0] : 'X').toUpperCase(),
       tabAccountColor: s.modalTab === 'account' ? 'var(--ink)' : 'var(--muted)',
       notSignedIn: !s.signedIn, plansTab: s.modalTab === 'plans', noHistory: !((s.history || []).length > 0),
       tabPlansColor: s.modalTab === 'plans' ? 'var(--ink)' : 'var(--muted)', tabBillingColor: s.modalTab === 'billing' ? 'var(--ink)' : 'var(--muted)', tabHistoryColor: s.modalTab === 'history' ? 'var(--ink)' : 'var(--muted)',
       hasToast: !!s.toast, toast: s.toast, toastBorder: s.toastErr ? 'var(--border-strong)' : 'var(--gold)',
-      balanceColor: (s.tier === 'paid' && (Number(s.balance) || 0) < 0.5) ? '#fbbf24' : 'var(--ink)',
+      balanceColor: (!s.isAdmin && s.tier === 'paid' && (Number(s.balance) || 0) < 0.5) ? '#fbbf24' : 'var(--ink)',
       planNoteColor: planNoteErr ? '#fb7185' : 'var(--gold)',
       onOpenPlans: this.onOpenPlans, onGoPlans: this.onGoPlans, onClosePlans: this.onClosePlans, onOpenHistory: this.onOpenHistory,
       onShowPlansTab: this.onShowPlansTab, onShowBilling: this.onShowBilling, onCloseCredits: this.onCloseCredits, onStop: this.onStop,
