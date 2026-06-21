@@ -315,11 +315,9 @@
           <sc-if value="{{ vResults }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top:18px; display:flex; gap:30px; align-items:flex-start; flex-wrap:wrap;">
               <div style="flex:1 1 420px; min-width:320px;">
-                <div style="position:relative; width:100%; border-radius:18px; overflow:hidden; border:1px solid var(--border); box-shadow:0 34px 80px rgba(0,0,0,.45);">
-                  <canvas id="ai-canvas" style="display:block; width:100%; height:auto;"></canvas>
-                  <sc-for list="{{ vBoxes }}" as="b" hint-placeholder-count="0">
-                    <div data-index="{{ b.index }}" onClick="{{ redactFinding }}" style="{{ b.boxStyle }}"><span style="{{ b.tagStyle }}">{{ b.label }}</span></div>
-                  </sc-for>
+                <div id="ai-canvas-wrap" style="position:relative; width:100%; border-radius:18px; overflow:hidden; border:1px solid var(--border); box-shadow:0 34px 80px rgba(0,0,0,.45);">
+                  <canvas id="ai-canvas" onMouseMove="{{ onCanvasMouseMove }}" onMouseLeave="{{ onCanvasMouseLeave }}" onClick="{{ onCanvasClick }}" style="display:block; width:100%; height:auto; cursor:crosshair;"></canvas>
+                  <div id="ai-lasso-tip" style="position:absolute; pointer-events:none; display:none; background:rgba(8,8,16,.88); border:1px solid rgba(255,255,255,.14); color:#fff; font-family:'Newsreader',Georgia,serif; font-size:12px; letter-spacing:.04em; padding:5px 10px; border-radius:8px; white-space:nowrap; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:10;"></div>
                 </div>
               </div>
               <div style="flex:0 0 360px; max-width:360px; display:flex; flex-direction:column; gap:13px;">
@@ -332,7 +330,7 @@
                   <p style="margin:0; font-size:13.5px; line-height:1.5; color:var(--muted);">{{ vSummary }}</p>
                 </sc-if>
                 <sc-if value="{{ vHasFindings }}" hint-placeholder-val="{{ false }}">
-                  <div style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.1em; color:var(--muted-2); text-transform:uppercase; margin-top:2px;">Visible vulnerabilities — click a box to blur</div>
+                  <div style="font-family:'Newsreader',Georgia,serif; font-size:11px; letter-spacing:.1em; color:var(--muted-2); text-transform:uppercase; margin-top:2px;">Visible vulnerabilities — hover then click lasso to redact</div>
                   <div style="display:flex; flex-direction:column; gap:10px;">
                     <sc-for list="{{ vCards }}" as="c" hint-placeholder-count="0">
                       <div onMouseEnter="{{ onCardHover }}" onMouseLeave="{{ onCardLeaveHover }}" data-index="{{ c.index }}" style="border-radius:14px; padding:12px 14px; position:relative; background:var(--card); border:1px solid var(--border); transition: border-color 0.2s;" style-hover="border-color:var(--pink);">
@@ -1407,106 +1405,200 @@ class Component extends DCLogic {
       risk_level: 'high',
       summary: 'Demo scan — this image reveals a readable street sign, a license plate and a reflected face. Sign in and upgrade to Pro to run the real Claude Opus scan.',
       findings: [
-        { type: 'street_sign', description: 'A readable street-name sign in the top-left pins the neighbourhood.', severity: 'high', bbox: [5, 5, 20, 15] },
-        { type: 'license_plate', description: 'A vehicle license plate is legible enough to trace ownership.', severity: 'high', bbox: [70, 80, 95, 95] },
-        { type: 'reflection', description: 'A face is visible in a window reflection near the centre.', severity: 'medium', bbox: [45, 40, 55, 60] },
+        { type: 'face', label: 'Subject face', description: 'A readable face in the top-left pins the person.', severity: 'high', bbox: [5, 5, 20, 30], polygon: [[5,5],[12,4],[20,6],[20,28],[12,30],[5,28]] },
+        { type: 'badge', label: 'ID badge', description: 'ID badge displaying name and role.', severity: 'high', bbox: [70, 80, 95, 95], polygon: [[70,80],[95,80],[95,95],[70,95]] },
+        { type: 'reflection', label: 'Reflection', description: 'A face is visible in a window reflection.', severity: 'medium', bbox: [45, 40, 55, 60], polygon: [[47,40],[55,42],[54,60],[45,58],[46,42]] },
       ],
     };
   }
 
-  getRect(f) {
+  // Return polygon (% coords) for a finding — prefer polygon, fallback to bbox corners
+  getPolygon(f) {
+    if (f.polygon && Array.isArray(f.polygon) && f.polygon.length >= 3) return f.polygon;
     if (f.bbox && Array.isArray(f.bbox) && f.bbox.length === 4) {
-      return { x: f.bbox[0], y: f.bbox[1], w: f.bbox[2] - f.bbox[0], h: f.bbox[3] - f.bbox[1] };
+      const [x0, y0, x1, y1] = f.bbox;
+      return [[x0,y0],[x1,y0],[x1,y1],[x0,y1]];
     }
-    return { x: 40, y: 40, w: 20, h: 20 }; // fallback
+    return [[35,35],[65,35],[65,65],[35,65]];
+  }
+
+  // Build a canvas polygon path from % coords
+  polyPath(ctx, poly, cw, ch) {
+    ctx.beginPath();
+    poly.forEach(([px,py], i) => {
+      const x = (px/100)*cw, y = (py/100)*ch;
+      i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    });
+    ctx.closePath();
+  }
+
+  // Ray-cast point-in-polygon — polygon in % coords, point in canvas px
+  pointInPoly(mx, my, poly, cw, ch) {
+    let inside = false;
+    for (let i=0, j=poly.length-1; i<poly.length; j=i++) {
+      const xi=(poly[i][0]/100)*cw, yi=(poly[i][1]/100)*ch;
+      const xj=(poly[j][0]/100)*cw, yj=(poly[j][1]/100)*ch;
+      const intersect = ((yi>my) !== (yj>my)) && (mx < (xj-xi)*(my-yi)/(yj-yi)+xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
   }
 
   paintAICanvas() {
-    const canvas = document.getElementById('ai-canvas'); const img = this._aiBaseImg;
+    const canvas = document.getElementById('ai-canvas');
+    const img = this._aiBaseImg;
     if (!canvas || !img) return;
-    canvas.width = img.naturalWidth || img.width; canvas.height = img.naturalHeight || img.height;
+    canvas.width = img.naturalWidth || img.width;
+    canvas.height = img.naturalHeight || img.height;
+    const cw = canvas.width, ch = canvas.height;
     const ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0);
 
     const findings = this.state.vFindings || [];
     const activeIdx = this.state.activeHoverIndex;
+    const SEVc = { high: '#fb7185', medium: '#fbbf24', low: '#34d399' };
 
-    // Draw content-aware blended redaction for redacted items
+    // Pass 1: feathered content-aware redaction inside each polygon
     findings.forEach((f) => {
       if (!f.redacted) return;
-      const rect = this.getRect(f);
-      const x = Math.round((rect.x / 100) * canvas.width);
-      const y = Math.round((rect.y / 100) * canvas.height);
-      const w = Math.max(4, Math.round((rect.w / 100) * canvas.width));
-      const h = Math.max(4, Math.round((rect.h / 100) * canvas.height));
+      const poly = this.getPolygon(f);
+      const xs = poly.map(p=>p[0]), ys = poly.map(p=>p[1]);
+      const bx = Math.round((Math.min(...xs)/100)*cw);
+      const by = Math.round((Math.min(...ys)/100)*ch);
+      const bw = Math.max(4, Math.round(((Math.max(...xs)-Math.min(...xs))/100)*cw));
+      const bh = Math.max(4, Math.round(((Math.max(...ys)-Math.min(...ys))/100)*ch));
 
-      // Sample border pixels to get a blending colour
-      const sampleW = Math.min(10, Math.floor(w * 0.25));
-      const sampleH = Math.min(10, Math.floor(h * 0.25));
-      let rSum = 0, gSum = 0, bSum = 0, count = 0;
-      const sampleRegions = [
-        { sx: Math.max(0, x - sampleW - 2), sy: y, sw: sampleW, sh: h },
-        { sx: Math.min(canvas.width - sampleW, x + w + 2), sy: y, sw: sampleW, sh: h },
-        { sx: x, sy: Math.max(0, y - sampleH - 2), sw: w, sh: sampleH },
-        { sx: x, sy: Math.min(canvas.height - sampleH, y + h + 2), sw: w, sh: sampleH },
+      // Sample surrounding border pixels for average colour
+      const pad = Math.max(14, Math.round(Math.min(bw,bh)*0.15));
+      let rS=0,gS=0,bS=0,cnt=0;
+      const regions = [
+        {sx:Math.max(0,bx-pad), sy:by, sw:pad, sh:bh},
+        {sx:Math.min(cw-pad,bx+bw), sy:by, sw:pad, sh:bh},
+        {sx:bx, sy:Math.max(0,by-pad), sw:bw, sh:pad},
+        {sx:bx, sy:Math.min(ch-pad,by+bh), sw:bw, sh:pad},
       ];
-      sampleRegions.forEach(({ sx, sy, sw, sh }) => {
-        if (sw <= 0 || sh <= 0) return;
-        try {
-          const d = ctx.getImageData(sx, sy, sw, sh).data;
-          for (let j = 0; j < d.length; j += 4) { rSum += d[j]; gSum += d[j+1]; bSum += d[j+2]; count++; }
-        } catch(e) { /* cross-origin guard */ }
+      regions.forEach(({sx,sy,sw,sh})=>{
+        if(sw<=0||sh<=0) return;
+        try { const d=ctx.getImageData(sx,sy,sw,sh).data; for(let j=0;j<d.length;j+=4){rS+=d[j];gS+=d[j+1];bS+=d[j+2];cnt++;} } catch(e){}
       });
-      const avgR = count > 0 ? Math.round(rSum / count) : 30;
-      const avgG = count > 0 ? Math.round(gSum / count) : 30;
-      const avgB = count > 0 ? Math.round(bSum / count) : 30;
+      const avgR=cnt>0?Math.round(rS/cnt):30, avgG=cnt>0?Math.round(gS/cnt):30, avgB=cnt>0?Math.round(bS/cnt):30;
 
-      // Gaussian-like blur pass over the region to blend into background
+      // Clip to polygon shape, then apply blur + blended fill
       ctx.save();
-      ctx.filter = 'blur(14px)';
-      ctx.drawImage(canvas, x, y, w, h, x, y, w, h);
+      this.polyPath(ctx, poly, cw, ch);
+      ctx.clip();
+      ctx.filter = 'blur(12px)';
+      ctx.drawImage(canvas, bx-pad, by-pad, bw+pad*2, bh+pad*2, bx-pad, by-pad, bw+pad*2, bh+pad*2);
+      ctx.filter = 'blur(8px)';
+      ctx.drawImage(canvas, bx-pad, by-pad, bw+pad*2, bh+pad*2, bx-pad, by-pad, bw+pad*2, bh+pad*2);
       ctx.filter = 'none';
-      // Light tinted fill with averaged colour at 80% opacity
-      ctx.fillStyle = `rgba(${avgR},${avgG},${avgB},0.82)`;
-      ctx.fillRect(x, y, w, h);
-      // Very subtle darkened edges to feel natural
-      const edgeGrad = ctx.createLinearGradient(x, y, x + w, y + h);
-      edgeGrad.addColorStop(0,   'rgba(0,0,0,0.18)');
-      edgeGrad.addColorStop(0.5, 'rgba(0,0,0,0.0)');
-      edgeGrad.addColorStop(1,   'rgba(0,0,0,0.18)');
-      ctx.fillStyle = edgeGrad;
-      ctx.fillRect(x, y, w, h);
+      ctx.fillStyle = `rgba(${avgR},${avgG},${avgB},0.80)`;
+      ctx.fill();
+      // Feathered edge darkening
+      const featherGrad = ctx.createRadialGradient(bx+bw/2,by+bh/2,Math.min(bw,bh)*0.28,bx+bw/2,by+bh/2,Math.max(bw,bh)*0.72);
+      featherGrad.addColorStop(0,'rgba(0,0,0,0)');
+      featherGrad.addColorStop(1,'rgba(0,0,0,0.20)');
+      ctx.fillStyle = featherGrad;
+      ctx.fill();
       ctx.restore();
     });
 
-    // Draw lasso for hovered (not-yet-redacted) item — tight outline + glow only
-    if (activeIdx !== null && activeIdx >= 0 && activeIdx < findings.length) {
-      const f = findings[activeIdx];
-      if (!f.redacted) {
-        const rect = this.getRect(f);
-        const x = Math.round((rect.x / 100) * canvas.width);
-        const y = Math.round((rect.y / 100) * canvas.height);
-        const w = Math.max(4, Math.round((rect.w / 100) * canvas.width));
-        const h = Math.max(4, Math.round((rect.h / 100) * canvas.height));
+    // Pass 2: draw lasso polygon outlines for non-redacted findings
+    findings.forEach((f, i) => {
+      if (f.redacted) return;
+      const poly = this.getPolygon(f);
+      const col = SEVc[f.severity] || '#fb7185';
+      const isHovered = i === activeIdx;
 
-        ctx.save();
-        // Outer glow
-        ctx.shadowColor = '#fb7185';
-        ctx.shadowBlur = 16;
-        ctx.strokeStyle = '#fb7185';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([10, 6]);
-        ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
-        // Inner subtle highlight
+      ctx.save();
+      this.polyPath(ctx, poly, cw, ch);
+      if (isHovered) {
+        // Thick glowing dashed outline on hover
+        ctx.shadowColor = col;
+        ctx.shadowBlur = 22;
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 3;
+        ctx.setLineDash([10, 5]);
+        ctx.stroke();
+        // Inner white sheen
+        this.polyPath(ctx, poly, cw, ch);
         ctx.shadowBlur = 0;
         ctx.setLineDash([]);
-        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
         ctx.lineWidth = 1;
-        ctx.strokeRect(x + 2, y + 2, w - 4, h - 4);
-        ctx.restore();
+        ctx.stroke();
+      } else {
+        // Thin resting lasso
+        ctx.shadowColor = col;
+        ctx.shadowBlur = 10;
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([7, 5]);
+        ctx.stroke();
+      }
+      ctx.restore();
+    });
+  }
+
+  // Canvas mouse move: hit-test polygons, show floating tooltip, update hover highlight
+  onCanvasMouseMove = (e) => {
+    const canvas = document.getElementById('ai-canvas');
+    const tip = document.getElementById('ai-lasso-tip');
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const mx = (e.clientX - rect.left) * scaleX;
+    const my = (e.clientY - rect.top) * scaleY;
+    const findings = this.state.vFindings || [];
+    let hit = -1;
+    for (let i=0; i<findings.length; i++) {
+      if (findings[i].redacted) continue;
+      if (this.pointInPoly(mx, my, this.getPolygon(findings[i]), canvas.width, canvas.height)) { hit=i; break; }
+    }
+    if (hit !== (this.state.activeHoverIndex === null ? -1 : this.state.activeHoverIndex)) {
+      this.setState({ activeHoverIndex: hit === -1 ? null : hit }, () => this.paintAICanvas());
+    }
+    if (tip) {
+      if (hit >= 0) {
+        const f = findings[hit];
+        const SEVL2 = { high:'HIGH RISK', medium:'MEDIUM', low:'LOW' };
+        tip.textContent = `${f.label || String(f.type||'').replace(/_/g,' ')} — ${SEVL2[f.severity]||f.severity||''}`;
+        const wrapRect = canvas.parentElement ? canvas.parentElement.getBoundingClientRect() : rect;
+        tip.style.display = 'block';
+        tip.style.left = Math.min(e.clientX - wrapRect.left + 14, wrapRect.width - 190) + 'px';
+        tip.style.top = Math.max(0, e.clientY - wrapRect.top - 40) + 'px';
+      } else {
+        tip.style.display = 'none';
       }
     }
-  }
+  };
+
+  onCanvasMouseLeave = () => {
+    const tip = document.getElementById('ai-lasso-tip');
+    if (tip) tip.style.display = 'none';
+    this.setState({ activeHoverIndex: null }, () => this.paintAICanvas());
+  };
+
+  // Canvas click: toggle redaction on whichever polygon the user clicked inside
+  onCanvasClick = (e) => {
+    const canvas = document.getElementById('ai-canvas');
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const mx = (e.clientX - rect.left) * scaleX;
+    const my = (e.clientY - rect.top) * scaleY;
+    const findings = this.state.vFindings || [];
+    for (let i=0; i<findings.length; i++) {
+      if (this.pointInPoly(mx, my, this.getPolygon(findings[i]), canvas.width, canvas.height)) {
+        this.setState((st) => ({
+          vFindings: st.vFindings.map((x,j) => j===i ? {...x, redacted: !x.redacted} : x)
+        }), () => this.paintAICanvas());
+        return;
+      }
+    }
+  };
 
   redactFinding = (e) => {
     const i = parseInt(e.currentTarget.dataset.index, 10);
@@ -1516,15 +1608,6 @@ class Component extends DCLogic {
     }, () => {
       this.paintAICanvas();
     });
-  };
-
-  onCardHover = (e) => {
-    const i = parseInt(e.currentTarget.dataset.index, 10);
-    this.setState({ activeHoverIndex: i }, () => this.paintAICanvas());
-  };
-
-  onCardLeaveHover = () => {
-    this.setState({ activeHoverIndex: null }, () => this.paintAICanvas());
   };
 
   onDownloadRedacted = () => {
@@ -1725,23 +1808,8 @@ class Component extends DCLogic {
       const locked = m.tier === 'paid' && !paidAccess;
       return { id: m.id, label: m.label + (locked ? ' — needs key / credits' : ''), disabled: locked };
     });
-    const SEVc = { high: '#fb7185', medium: '#fbbf24', med: '#fbbf24', low: '#34d399' };
     const SEVL = { high: ['HIGH RISK', '#fb7185'], medium: ['MEDIUM', '#fbbf24'], med: ['MEDIUM', '#fbbf24'], low: ['LOW', '#34d399'] };
     const vFindings = s.vFindings || [];
-    const vReveal = s.vReveal;
-    const vBoxes = vFindings.map((f, i) => {
-      const r = this.getRect(f);
-      const col = f.redacted ? '#34d39900' : (SEVc[f.severity] || '#fb7185');
-      const dl = (0.05 + i * 0.08).toFixed(2);
-      // Hide the box entirely — we draw everything on the canvas now
-      const visible = !f.redacted && vReveal;
-      return {
-        index: i,
-        label: f.redacted ? '' : String(f.type || '').replace(/_/g, ' '),
-        boxStyle: `position:absolute; left:${r.x}%; top:${r.y}%; width:${r.w}%; height:${r.h}%; border:${visible ? '2px' : '0px'} solid ${col}; background:transparent; border-radius:6px; cursor:pointer; display:flex; align-items:flex-start; justify-content:flex-start; padding:3px; opacity:${visible ? 1 : 0}; transform:scale(${vReveal ? 1 : 1.05}); transition:opacity .4s ease ${dl}s, transform .4s ease ${dl}s; pointer-events:${visible ? 'auto' : 'none'};`,
-        tagStyle: `font-size:9px; letter-spacing:.04em; color:#fff; background:rgba(8,8,16,.75); padding:1px 5px; border-radius:4px; pointer-events:none; white-space:nowrap;`,
-      };
-    });
     const vCards = vFindings.map((f, i) => {
       const sl = SEVL[f.severity] || SEVL.medium;
       return {
@@ -1799,7 +1867,8 @@ class Component extends DCLogic {
       costHints: this.COST_HINTS(),
       vCollapsed: s.vStage === 'collapsed', vScanning: s.vStage === 'scanning', vResults: s.vStage === 'results',
       vErrorState: s.vStage === 'error', vError: s.vError,
-      vBoxes, vCards, vHasFindings: vFindings.length > 0, vFindingCount: vFindings.length,
+      vBoxes: [], 
+      vCards, vHasFindings: vFindings.length > 0, vFindingCount: vFindings.length,
       vSummary: s.vReport ? (s.vReport.summary || '') : '', hasVSummary: !!(s.vReport && s.vReport.summary),
       vRiskDot, vIsDemo: s.vDemo, showDemoNote: !paidAccess && !backendOn,
       vTitle: vFindings.length ? (vFindings.length + ' visible ' + (vFindings.length > 1 ? 'risks' : 'risk') + ' found') : 'No obvious visible risks',
@@ -1821,6 +1890,7 @@ class Component extends DCLogic {
       onShowPlansTab: this.onShowPlansTab, onShowBilling: this.onShowBilling, onCloseCredits: this.onCloseCredits, onStop: this.onStop,
       onModelChange: this.onModelChange,
       onAddCredits: this.onAddCredits, onRunVisual: this.onRunVisual, redactFinding: this.redactFinding,
+      onCanvasMouseMove: this.onCanvasMouseMove, onCanvasMouseLeave: this.onCanvasMouseLeave, onCanvasClick: this.onCanvasClick,
       onDownloadRedacted: this.onDownloadRedacted, onDownloadStripped: this.onDownloadStripped,
       onSignIn: this.onSignIn, onSignOut: this.onSignOut, onOpenAuth: this.onOpenAuth, onCloseAuth: this.onCloseAuth,
       onSignInGoogle: this.onSignInGoogle, onShowAccount: this.onShowAccount, onOpenAccount: this.onOpenAccount,
