@@ -26,6 +26,7 @@
   --color-danger: #fb7185;
   --color-btn: #ffffff;
   --color-btn-ink: #000000;
+  --gold: #dcb43c;
   --header-bg-scrolled: rgba(8, 8, 12, 0.62);
 }
 
@@ -42,6 +43,7 @@
   --color-muted-2: rgba(22, 24, 29, 0.5);
   --color-btn: #000000;
   --color-btn-ink: #ffffff;
+  --gold: #cfa63c;
   --header-bg-scrolled: rgba(241, 241, 238, 0.72);
 }
 
@@ -106,6 +108,37 @@ a {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+@keyframes textShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 300% 50%;
+  }
+}
+/* Animated theme-toggle face flip, matching the XenLens design */
+::view-transition-old(theme-toggle) {
+  animation: toggleOut 0.55s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+::view-transition-new(theme-toggle) {
+  animation: toggleIn 0.55s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes toggleOut {
+  to {
+    opacity: 0;
+    transform: rotateX(90deg);
+  }
+}
+@keyframes toggleIn {
+  from {
+    opacity: 0;
+    transform: rotateX(-90deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotateX(0deg);
   }
 }
 

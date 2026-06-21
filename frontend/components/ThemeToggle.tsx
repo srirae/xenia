@@ -12,13 +12,21 @@ export function ThemeToggle() {
 
   function toggle() {
     const next = theme === 'light' ? 'dark' : 'light';
-    setTheme(next);
-    document.documentElement.setAttribute('data-theme', next);
-    try {
-      localStorage.setItem('veil-theme', next);
-    } catch {
-      /* ignore */
-    }
+    const apply = () => {
+      setTheme(next);
+      document.documentElement.setAttribute('data-theme', next);
+      try {
+        localStorage.setItem('veil-theme', next);
+      } catch {
+        /* ignore */
+      }
+    };
+    // Smooth face-flip transition where supported (matches the XenLens design).
+    const startVT = (document as unknown as {
+      startViewTransition?: (cb: () => void) => void;
+    }).startViewTransition;
+    if (typeof startVT === 'function') startVT.call(document, apply);
+    else apply();
   }
 
   return (
@@ -28,25 +36,29 @@ export function ThemeToggle() {
       style={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        width: 38,
+        gap: 9,
         height: 38,
-        borderRadius: '50%',
+        padding: '0 15px',
+        borderRadius: 999,
         background: 'var(--color-card)',
         border: '1px solid var(--color-border)',
         color: 'var(--color-ink)',
         cursor: 'pointer',
+        fontFamily: 'var(--font-newsreader), Georgia, serif',
+        fontSize: 14,
+        viewTransitionName: 'theme-toggle',
       }}
     >
       <span
         style={{
           position: 'relative',
           display: 'block',
-          width: 16,
-          height: 16,
+          width: 15,
+          height: 15,
           borderRadius: '50%',
           border: '1.6px solid currentColor',
           overflow: 'hidden',
+          flex: 'none',
         }}
       >
         <span
@@ -60,6 +72,7 @@ export function ThemeToggle() {
           }}
         />
       </span>
+      <span>{theme === 'light' ? 'Lumen' : 'Umbra'}</span>
     </button>
   );
 }

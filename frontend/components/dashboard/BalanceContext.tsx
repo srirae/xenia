@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { apiFetch, type BalanceResponse } from '@/lib/api';
+import { getByokKey } from '@/lib/byok';
 
 interface BalanceState {
   tier: 'free' | 'paid';
@@ -9,8 +10,14 @@ interface BalanceState {
   displayName: string | null;
   email: string | null;
   loading: boolean;
+  /** True when the user has saved their own API key in this browser. */
+  byok: boolean;
+  /** Paid features are unlocked by credits OR a personal key. */
+  hasPaidAccess: boolean;
   /** Re-fetch from the backend (source of truth). */
   refresh: () => Promise<void>;
+  /** Re-read the BYOK flag from localStorage (after the plan page saves). */
+  refreshByok: () => void;
   /** Optimistically set after a scan response without a round-trip. */
   applyScanResult: (tier: 'free' | 'paid', remaining: number | null) => void;
 }
@@ -23,6 +30,9 @@ export function BalanceProvider({ children }: { children: React.ReactNode }) {
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [byok, setByok] = useState(false);
+
+  const refreshByok = useCallback(() => setByok(Boolean(getByokKey())), []);
 
   const refresh = useCallback(async () => {
     try {
@@ -45,10 +55,24 @@ export function BalanceProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     void refresh();
-  }, [refresh]);
+    refreshByok();
+  }, [refresh, refreshByok]);
 
   return (
-    <Ctx.Provider value={{ tier, balance, displayName, email, loading, refresh, applyScanResult }}>
+    <Ctx.Provider
+      value={{
+        tier,
+        balance,
+        displayName,
+        email,
+        loading,
+        byok,
+        hasPaidAccess: tier === 'paid' || byok,
+        refresh,
+        refreshByok,
+        applyScanResult,
+      }}
+    >
       {children}
     </Ctx.Provider>
   );

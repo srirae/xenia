@@ -10,7 +10,7 @@ import { useBalance } from './BalanceContext';
 export function DashboardNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { tier, balance, loading } = useBalance();
+  const { tier, balance, loading, byok } = useBalance();
 
   async function signOut() {
     const supabase = createClient();
@@ -22,6 +22,7 @@ export function DashboardNav() {
   const links = [
     { href: '/dashboard', label: 'Scanner' },
     { href: '/dashboard/history', label: 'History' },
+    { href: '/dashboard/plan', label: 'Plans' },
     { href: '/dashboard/billing', label: 'Billing' },
   ];
 
@@ -66,7 +67,7 @@ export function DashboardNav() {
                   fontSize: 14,
                   textDecoration: 'none',
                   color: active ? 'var(--color-ink)' : 'var(--color-muted)',
-                  borderBottom: active ? '2px solid var(--teal)' : '2px solid transparent',
+                  borderBottom: active ? '2px solid var(--gold)' : '2px solid transparent',
                   paddingBottom: 2,
                 }}
               >
@@ -77,6 +78,20 @@ export function DashboardNav() {
         </nav>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {!loading && tier !== 'paid' && byok && (
+            <span
+              style={{
+                fontSize: 12,
+                padding: '6px 12px',
+                borderRadius: 999,
+                border: '1px solid var(--gold)',
+                color: 'var(--gold)',
+                background: 'var(--color-chip)',
+              }}
+            >
+              Own key active
+            </span>
+          )}
           {!loading && tier === 'paid' && (
             <Link
               href="/dashboard/billing"

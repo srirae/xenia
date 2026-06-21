@@ -64,10 +64,15 @@ async function postJson(url: string, headers: Record<string, string>, body: unkn
   }
 }
 
-/** Calls the correct gateway for the chosen model and normalises the result. */
+/**
+ * Calls the correct gateway for the chosen model and normalises the result.
+ * `openrouterKeyOverride` lets a BYOK user supply their own OpenRouter key for
+ * this single request; it is used transiently and never persisted.
+ */
 export async function runVisionScan(
   model: ModelConfig,
   base64Image: string,
+  openrouterKeyOverride?: string,
 ): Promise<VisionResult> {
   let data: ChatCompletion;
 
@@ -87,7 +92,7 @@ export async function runVisionScan(
     data = await postJson(
       'https://openrouter.ai/api/v1/chat/completions',
       {
-        Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${openrouterKeyOverride || env.OPENROUTER_API_KEY}`,
         'HTTP-Referer': env.APP_URL,
         'X-Title': 'Doxxing Shield',
       },

@@ -58,7 +58,7 @@ function BillingInner() {
             borderRadius: 12,
             padding: '12px 16px',
             fontSize: 14,
-            borderColor: 'var(--teal)',
+            borderColor: 'var(--gold)',
           }}
         >
           {toast}

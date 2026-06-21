@@ -20,9 +20,9 @@ const newsreader = Newsreader({
 });
 
 export const metadata: Metadata = {
-  title: 'Veil — Share the moment. Not your identity.',
+  title: 'XenLens — Share the moment. Not your identity.',
   description:
-    'Veil detects and removes the hidden metadata and visible clues that leak your location and identity from photos — before you post.',
+    'XenLens detects and removes the hidden metadata and visible clues that leak your location and identity from photos — before you post.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

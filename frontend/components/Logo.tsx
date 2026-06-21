@@ -30,7 +30,8 @@ export function Logo({ size = 30 }: { size?: number }) {
         className="font-display"
         style={{ fontWeight: 400, fontSize: 24, letterSpacing: '.01em' }}
       >
-        Veil
+        <span style={{ color: 'var(--gold)' }}>Xen</span>
+        <span style={{ color: 'var(--color-ink)' }}>Lens</span>
       </span>
     </div>
   );

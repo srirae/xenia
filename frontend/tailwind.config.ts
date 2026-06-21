@@ -19,6 +19,7 @@ const config: Config = {
         teal: 'var(--teal)',
         violet: 'var(--violet)',
         pink: 'var(--pink)',
+        gold: 'var(--gold)',
         danger: 'var(--color-danger)',
       },
       fontFamily: {

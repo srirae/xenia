@@ -6,6 +6,7 @@ import { apiFetch, type AnalyzeResponse, type Finding, type ScanReport, type Api
 import { extractLeaks, parseJpegExif, stripMetadata, stripAndEncode, type Leak } from '@/lib/exif';
 import { locationToRect, redactRegion, SEVERITY_COLOR } from '@/lib/redact';
 import { CLIENT_MODELS, DEFAULT_MODEL_ID } from '@/lib/models';
+import { getByokKey } from '@/lib/byok';
 import { useBalance } from './BalanceContext';
 import { CreditsModal } from './CreditsModal';
 
@@ -23,7 +24,7 @@ const SEV_LABEL: Record<string, [string, string]> = {
 
 export function Scanner() {
   const router = useRouter();
-  const { tier, refresh, applyScanResult } = useBalance();
+  const { hasPaidAccess, refresh, applyScanResult } = useBalance();
 
   const [stage, setStage] = useState<Stage>('idle');
   const [error, setError] = useState('');
@@ -113,7 +114,12 @@ export function Scanner() {
       try {
         const data = await apiFetch<AnalyzeResponse>('/api/analyze', {
           method: 'POST',
-          body: JSON.stringify({ base64Image: base64, chosenModel }),
+          body: JSON.stringify({
+            base64Image: base64,
+            chosenModel,
+            // Sent only if the user saved their own key on the Plans page.
+            byokKey: getByokKey() || undefined,
+          }),
         });
 
         setReport(data.report);
@@ -194,7 +200,7 @@ export function Scanner() {
     if (f) void handleFile(f);
   };
 
-  const paidModels = tier === 'paid';
+  const paidModels = hasPaidAccess;
 
   return (
     <div>
@@ -407,20 +413,21 @@ export function Scanner() {
                   <div className="card" style={{ borderRadius: 12, padding: 14, textAlign: 'center' }}>
                     <div style={{ fontSize: 13, fontWeight: 600 }}>🔒 Download fully redacted image</div>
                     <div style={{ marginTop: 4, fontSize: 11.5, color: 'var(--color-muted-2)', lineHeight: 1.4 }}>
-                      Redactions are visible on screen but not saved into your download. Upgrade to
-                      export a fully redacted image and save your scan history.
+                      Redactions are visible on screen but not saved into your download. Add credits —
+                      or bring your own API key — to export a fully redacted image and save your scan
+                      history.
                     </div>
                     <a
-                      href="/dashboard/billing"
+                      href="/dashboard/plan"
                       style={{
                         display: 'inline-block',
                         marginTop: 10,
                         fontSize: 13,
-                        color: 'var(--teal)',
+                        color: 'var(--gold)',
                         textDecoration: 'none',
                       }}
                     >
-                      Add credits →
+                      See plans →
                     </a>
                   </div>
                 ) : (

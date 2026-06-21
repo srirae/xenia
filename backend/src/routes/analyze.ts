@@ -25,6 +25,14 @@ const BodySchema = z.object({
     .string()
     .default(DEFAULT_MODEL_ID)
     .refine(isModelId, 'Invalid model selection.'),
+  // BYOK: the user's own OpenRouter key, used transiently for this one request
+  // and never stored. Validated to a sane shape; empty/absent means "no BYOK".
+  byokKey: z
+    .string()
+    .trim()
+    .regex(/^sk-or-[A-Za-z0-9._-]{8,}$/, 'Invalid OpenRouter key format.')
+    .optional()
+    .or(z.literal('')),
 });
 
 /**
@@ -50,7 +58,10 @@ analyzeRouter.post(
       return res.status(400).json({ error: first?.message ?? 'Invalid request.' });
     }
     const { base64Image, chosenModel } = parsed.data;
+    const byokKey = parsed.data.byokKey?.trim() || '';
+    const hasByok = byokKey.length > 0;
     const modelConfig = MODEL_REGISTRY[chosenModel];
+    const isPaidModel = modelConfig.gateway !== 'nvidia';
 
     // ── Fetch profile (service role; we only read here) ─────────────────────
     const { data: profile, error: profileError } = await supabaseAdmin
@@ -63,86 +74,81 @@ analyzeRouter.post(
       return res.status(404).json({ error: 'User profile not found.' });
     }
 
-    // ── FREE TIER PATH ──────────────────────────────────────────────────────
-    // The metadata strip already happened in the browser. Free users still get
-    // the full NIM visual scan (the spec gates the *output*, not the scan), but
-    // a free user may only use the free NIM model and nothing is billed/saved.
-    if (profile.tier === 'free') {
-      if (modelConfig.tier !== 'free') {
+    const isPaidTier = profile.tier === 'paid';
+    const balance = Number(profile.virtual_balance);
+    // Paid features unlock via credits OR the user's own key.
+    const paidAccess = isPaidTier || hasByok;
+
+    // ── Gate: a paid model needs either BYOK or a positive credit balance ────
+    if (isPaidModel && !hasByok) {
+      if (!isPaidTier || !(balance > 0)) {
+        // Idempotently reset tier so future calls short-circuit here.
+        if (isPaidTier) await supabaseAdmin.rpc('deduct_balance', { uid: user.id, amount: 0 });
         return res.status(402).json({
-          error: 'This model requires credits. Add credits to unlock paid models.',
+          error: 'This model needs credits or your own API key.',
           code: 'CREDITS_EXHAUSTED',
         });
       }
-
-      const { text } = await runVisionScan(modelConfig, base64Image);
-      const report = parseReport(text);
-
-      return res.json({
-        tier: 'free',
-        report,
-        cost_deducted: 0,
-        remaining_balance: null,
-        // Free tier is told it cannot save history / download redacted image;
-        // the frontend enforces the download gate.
-        gated: { save_history: false, download_redacted: false, model_switcher: false },
-      });
     }
 
-    // ── PAID TIER: balance check ─────────────────────────────────────────────
-    const balance = Number(profile.virtual_balance);
-    if (!(balance > 0)) {
-      // Idempotently reset tier so future calls short-circuit here.
-      await supabaseAdmin.rpc('deduct_balance', { uid: user.id, amount: 0 });
-      return res.status(402).json({
-        error: 'Insufficient credits. Scan blocked.',
-        code: 'CREDITS_EXHAUSTED',
-      });
-    }
-
-    // ── Vision call ───────────────────────────────────────────────────────────
-    const { text, usage } = await runVisionScan(modelConfig, base64Image);
+    // ── Vision call ──────────────────────────────────────────────────────────
+    // BYOK only applies to OpenRouter (paid) models; NIM is always our free key.
+    const { text, usage } = await runVisionScan(
+      modelConfig,
+      base64Image,
+      isPaidModel && hasByok ? byokKey : undefined,
+    );
     const report = parseReport(text);
+    const riskLevel = typeof report.risk_level === 'string' ? (report.risk_level as string) : null;
 
-    // ── Cost + atomic deduction ───────────────────────────────────────────────
+    // ── Cost: free model = $0; BYOK = $0 (user pays their provider); else bill ─
     const scanCost =
-      modelConfig.gateway === 'nvidia'
+      !isPaidModel || hasByok
         ? 0
         : calculateScanCost(chosenModel, usage.prompt_tokens, usage.completion_tokens);
 
-    const { data: newBalanceRaw, error: deductError } = await supabaseAdmin.rpc(
-      'deduct_balance',
-      { uid: user.id, amount: scanCost },
-    );
-    if (deductError) {
-      // eslint-disable-next-line no-console
-      console.error('deduct_balance failed:', deductError);
-      return res.status(500).json({ error: 'Failed to settle scan cost.' });
+    let remainingBalance: number | null = isPaidTier ? balance : null;
+    let creditsExhausted = false;
+
+    if (scanCost > 0) {
+      const { data: newBalanceRaw, error: deductError } = await supabaseAdmin.rpc('deduct_balance', {
+        uid: user.id,
+        amount: scanCost,
+      });
+      if (deductError) {
+        // eslint-disable-next-line no-console
+        console.error('deduct_balance failed:', deductError);
+        return res.status(500).json({ error: 'Failed to settle scan cost.' });
+      }
+      remainingBalance = Number(newBalanceRaw ?? Math.max(0, balance - scanCost));
+      creditsExhausted = remainingBalance <= 0;
     }
 
-    const remainingBalance = Number(newBalanceRaw ?? Math.max(0, balance - scanCost));
-    const creditsExhausted = remainingBalance <= 0;
-
-    // ── Log history (service role; browser can never write scans) ─────────────
-    const riskLevel =
-      typeof report.risk_level === 'string' ? (report.risk_level as string) : null;
-    await supabaseAdmin.from('scans').insert({
-      user_id: user.id,
-      model_used: chosenModel,
-      tokens_input: usage.prompt_tokens,
-      tokens_output: usage.completion_tokens,
-      cost_deducted: scanCost,
-      risk_level: riskLevel,
-      tier_at_scan: 'paid',
-    });
+    // ── Log history for anyone with paid access (credits or BYOK) ─────────────
+    if (paidAccess) {
+      await supabaseAdmin.from('scans').insert({
+        user_id: user.id,
+        model_used: chosenModel,
+        tokens_input: usage.prompt_tokens,
+        tokens_output: usage.completion_tokens,
+        cost_deducted: scanCost,
+        risk_level: riskLevel,
+        tier_at_scan: hasByok && !isPaidTier ? 'byok' : profile.tier,
+      });
+    }
 
     return res.json({
-      tier: 'paid',
+      tier: profile.tier,
+      byok: hasByok,
       report,
       cost_deducted: scanCost,
       remaining_balance: remainingBalance,
       credits_exhausted: creditsExhausted,
-      gated: { save_history: true, download_redacted: true, model_switcher: true },
+      gated: {
+        save_history: paidAccess,
+        download_redacted: paidAccess,
+        model_switcher: paidAccess,
+      },
       ...(creditsExhausted && { code: 'CREDITS_EXHAUSTED' }),
     });
   }),

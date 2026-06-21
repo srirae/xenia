@@ -72,26 +72,17 @@ export default async function LandingPage() {
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 8,
-              padding: '6px 13px',
+              justifyContent: 'center',
+              padding: '8px 16px',
               borderRadius: 999,
               background: 'var(--color-card)',
-              border: '1px solid var(--color-border)',
+              border: '1px solid #2ee06a',
               fontSize: 12,
+              lineHeight: 1,
               ...muted,
             }}
           >
-            <span
-              style={{
-                width: 7,
-                height: 7,
-                borderRadius: '50%',
-                background: 'var(--teal)',
-                boxShadow: '0 0 9px var(--teal)',
-                animation: 'dotPulse 2s ease-in-out infinite',
-              }}
-            />
-            Hidden data + visible clues — found and removed.
+            On-Device · You&apos;re in control of your Data
           </div>
 
           <h1
@@ -110,9 +101,9 @@ export default async function LandingPage() {
           </h1>
 
           <p style={{ maxWidth: 560, margin: '20px auto 0', fontSize: 16, lineHeight: 1.55, ...muted }}>
-            AI can now find your home from a single photo. Veil finds what leaks — the hidden GPS and
-            device data <em>and</em> the visible clues in the picture itself — then strips it before
-            you post.
+            AI can now find your home from a single photo. XenLens finds what leaks — the hidden GPS
+            and device data <em>and</em> the visible clues in the picture itself — then strips it
+            before you post.
           </p>
 
           <div style={{ marginTop: 34, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -146,7 +137,7 @@ export default async function LandingPage() {
               ['04', 'Private by architecture', 'Metadata never leaves your browser. The visual scan runs on an API that does not train on your image.'],
             ].map(([n, title, body]) => (
               <div key={n} className="card" style={{ borderRadius: 16, padding: 24 }}>
-                <div className="font-display" style={{ fontSize: 13, color: 'var(--teal)', letterSpacing: '.1em' }}>
+                <div className="font-display" style={{ fontSize: 13, color: 'var(--gold)', letterSpacing: '.1em' }}>
                   {n}
                 </div>
                 <div className="font-display" style={{ marginTop: 12, fontSize: 23 }}>
@@ -219,7 +210,7 @@ export default async function LandingPage() {
           <Logo size={26} />
         </div>
         Questions? {process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'aegiswheil@gmail.com'} ·{' '}
-        <Link href="/dashboard" style={{ color: 'var(--teal)' }}>
+        <Link href="/dashboard" style={{ color: 'var(--gold)' }}>
           Open the app
         </Link>
       </footer>
@@ -241,7 +232,7 @@ function SectionKicker({ children, center }: { children: React.ReactNode; center
         fontSize: 12,
         letterSpacing: '.18em',
         textTransform: 'uppercase',
-        color: 'var(--teal)',
+        color: 'var(--gold)',
         textAlign: center ? 'center' : 'left',
       }}
     >
@@ -271,7 +262,7 @@ function Bullets({ items }: { items: string[] }) {
     <div style={{ marginTop: 22, display: 'flex', flexDirection: 'column', gap: 11, fontSize: 14, color: 'var(--color-muted)' }}>
       {items.map((it) => (
         <div key={it} style={{ display: 'flex', gap: 9 }}>
-          <span style={{ color: 'var(--teal)' }}>✓</span> {it}
+          <span style={{ color: 'var(--gold)' }}>✓</span> {it}
         </div>
       ))}
     </div>
