@@ -12,8 +12,6 @@
 
 <br>
 
-[Features](#-features) · [How it works](#-how-it-works) · [Stack](#-stack) · [Run locally](#-run-locally) · [Deploy](#-deploy) · [Security](#-security)
-
 </div>
 
 ---
