@@ -87,7 +87,22 @@ analyzeRouter.post(
     }
 
     // ── Vision call ──────────────────────────────────────────────────────────
-    const { text, usage } = await runVisionScan(modelConfig, base64Image);
+    if (env.CREDIT_API_KEY_OPENROUTER === 'MISSING') {
+      return res.status(503).json({ error: 'The backend is missing the OpenRouter API key. Please set CREDIT_API_KEY_OPENROUTER in Render Environment Variables.' });
+    }
+
+    let text, usage;
+    try {
+      const result = await runVisionScan(modelConfig, base64Image);
+      text = result.text;
+      usage = result.usage;
+    } catch (err: unknown) {
+      // eslint-disable-next-line no-console
+      console.error('runVisionScan failed:', err);
+      const msg = err instanceof Error ? err.message : 'Unknown AI error';
+      return res.status(502).json({ error: `AI Provider Error: ${msg}` });
+    }
+    
     const report = parseReport(text);
     const riskLevel = typeof report.risk_level === 'string' ? (report.risk_level as string) : null;
 
