@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   Veil design tokens — ported verbatim from the pre-built frontend.
+   Dark is the default; [data-theme="light"] overrides.
+   ============================================================================ */
+:root,
+[data-theme='dark'] {
+  --teal: #2dd4bf;
+  --violet: #8b5cf6;
+  --pink: #f472b6;
+  --grad: linear-gradient(120deg, var(--teal), var(--violet), var(--pink));
+
+  --color-bg: #000000;
+  --color-surface: #0c0c12;
+  --color-card: rgba(255, 255, 255, 0.045);
+  --color-card-hover: rgba(255, 255, 255, 0.07);
+  --color-border: rgba(255, 255, 255, 0.09);
+  --color-border-strong: rgba(255, 255, 255, 0.14);
+  --color-chip: rgba(255, 255, 255, 0.03);
+  --color-ink: #f4f3fb;
+  --color-muted: rgba(244, 243, 251, 0.62);
+  --color-muted-2: rgba(244, 243, 251, 0.46);
+  --color-danger: #fb7185;
+  --color-btn: #ffffff;
+  --color-btn-ink: #000000;
+  --header-bg-scrolled: rgba(8, 8, 12, 0.62);
+}
+
+[data-theme='light'] {
+  --color-bg: #f1f1ee;
+  --color-surface: #ffffff;
+  --color-card: rgba(0, 0, 0, 0.04);
+  --color-card-hover: rgba(0, 0, 0, 0.07);
+  --color-border: rgba(0, 0, 0, 0.1);
+  --color-border-strong: rgba(0, 0, 0, 0.16);
+  --color-chip: rgba(0, 0, 0, 0.03);
+  --color-ink: #16181d;
+  --color-muted: rgba(22, 24, 29, 0.64);
+  --color-muted-2: rgba(22, 24, 29, 0.5);
+  --color-btn: #000000;
+  --color-btn-ink: #ffffff;
+  --header-bg-scrolled: rgba(241, 241, 238, 0.72);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-newsreader), Georgia, serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.35s ease, color 0.35s ease;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
+
+/* shared keyframes from the original design */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes spinRev {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+@keyframes scanMove {
+  0% {
+    top: -3%;
+  }
+  100% {
+    top: 103%;
+  }
+}
+@keyframes dotPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.7);
+  }
+}
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.font-display {
+  font-family: var(--font-instrument), Georgia, serif;
+}
+
+/* utility classes mapped to tokens */
+.surface {
+  background: var(--color-surface);
+}
+.card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+}
+.grad-text {
+  background: linear-gradient(110deg, #2dfbe0, #9d7bff 52%, #ff5fc4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.grad-bg {
+  background: var(--grad);
+}

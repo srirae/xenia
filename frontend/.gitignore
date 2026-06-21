@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+build/
+.env
+.env.local
+.env.example
+.env.*.local
+*.log
+.DS_Store
+next-env.d.ts
+
+# Legacy design source / scratch assets (kept for reference only)
+uploads/
+.thumbnail
+*.md

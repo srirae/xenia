@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.example
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+backend/.env.example
+frontend/.env.local
+frontend/.env.example
+
+# Logs and system files
+*.log
+.DS_Store
+Thumbs.db
+
+# Build outputs
+backend/dist/
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Markdown files (as requested)
+*.md
+markdown/
